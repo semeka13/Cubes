@@ -13,8 +13,8 @@ pygame.display.set_caption('Dungeon Master')
 tile_size = 50
 
 # load images
-cave_img = pygame.image.load('images/cave.png')
-lava_img = pygame.image.load('images/lava.png')
+cave_img = pygame.image.load('images/cave_bk.png')
+lava_img = pygame.image.load('images/lava_bk.png')
 
 
 def draw_grid():
