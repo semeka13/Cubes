@@ -25,7 +25,13 @@ def draw_grid():
 
 class Player():
     def __init__(self, x, y):
-        player = pygame.image.load('')
+        player = pygame.image.load('images/player.png')
+        self.player = pygame.transform.scale(player, (40, 40))
+        self.rect = self.player.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.y_inc = 0
+        self.jump = False
 class World():
     def __init__(self, data):
         self.tile_list = []
