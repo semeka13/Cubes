@@ -29,14 +29,14 @@ class StartWindow:
     def update(self):
         intro_text = ["Dungeon Master", "",
                       "Game rules: get to the finish line alive", "",
-                      "Press <Enter> or <Space> to Start",
+                      "Press <Enter> to Start",
                       "Press <Esc> to Exit"]
 
         fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
         screen.blit(fon, (0, 0))
         font = pygame.font.SysFont(
             'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 30)
-        text_coord = 50
+        text_coord = screen_height // 4
         for line in intro_text:
             string_rendered = font.render(line, 1, pygame.Color('white'))
             intro_rect = string_rendered.get_rect()
@@ -49,7 +49,7 @@ class StartWindow:
         if key[pygame.K_ESCAPE]:
             pygame.quit()
             sys.exit()
-        elif key[pygame.K_SPACE] or key[pygame.K_RETURN]:
+        elif key[pygame.K_RETURN]:
             print('игра начата')
             # начинаем игру
             return True
@@ -66,9 +66,9 @@ class Player:
         self.height = self.player.get_height()
         self.y_inc = 0
         self.jump = False
+        self.in_air = True
 
     def update(self):
-
         x_change = 0
         y_change = 0
 
@@ -107,6 +107,7 @@ class Player:
                     y_change = tile[1].top - self.rect.bottom
                     self.y_inc = 0
                     self.in_air = False
+
         # update player coordinates
         self.rect.x += x_change
         self.rect.y += y_change
@@ -128,64 +129,64 @@ class Player:
 
 
 class World:
-    def __init__(self, data):
+    def world_plan(self, data):
         self.tile_list = []
-
+        pos = 0
         # load images
-        dirt_img = pygame.image.load('../images/platform_1.png')
-        # grass_img = pygame.image.load('img/grass.png')
+        tile_images = {
+           'platform_1': pygame.image.load('../images/platform_1.png'),
+           'killer_block': pygame.image.load('../images/spikes.png')
+        }
 
         row_count = 0
         for row in data:
             col_count = 0
             for tile in row:
-                if tile != 0:
-                    img = pygame.transform.scale(dirt_img, (tile_size, tile_size))
+                if tile == '#':
+                    img = pygame.transform.scale(tile_images['platform_1'], (tile_size, tile_size))
                     img_rect = img.get_rect()
                     img_rect.x = col_count * tile_size
                     img_rect.y = row_count * tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
+                if tile == '@':
+                    player_start_pos_x = col_count * tile_size
+                    player_start_pos_y = row_count * tile_size
+                    pos = (player_start_pos_x, player_start_pos_y)
                 col_count += 1
             row_count += 1
+        return pos
 
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
 
-world_data = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1],
-    [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 2, 2, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 7, 0, 5, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 1],
-    [1, 7, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 7, 0, 0, 0, 0, 1],
-    [1, 0, 2, 0, 0, 7, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 2, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0, 0, 0, 2, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 2, 2, 2, 2, 2, 1],
-    [1, 0, 0, 0, 0, 0, 2, 2, 2, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
+def load_level(filename):
+    filename = "../levels/" + filename
+    # читаем уровень, убирая символы перевода строки
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+
+    # и подсчитываем максимальную длину
+    max_width = max(map(len, level_map))
+
+    # дополняем каждую строку пустыми клетками ('.')
+    new_level = list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    print(new_level)
+    return new_level
+
 
 start_screen = StartWindow()
 start_flag = True
-player = Player(100, screen_height - 130)
-world = World(world_data)
+world_data = load_level('level_test')
+world = World()
+player_pos = world.world_plan(world_data)
+player = Player(*player_pos)
 clock = pygame.time.Clock()
 
 run = True
 while run:
-
     screen.blit(lava_img, (0, 0))
     # screen.blit(sun_img, (100, 100))
     if start_flag:

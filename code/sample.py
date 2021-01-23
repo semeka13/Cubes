@@ -37,7 +37,7 @@ def start_screen():
     fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.SysFont('sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 30)
-    text_coord = 50
+    text_coord = HEIGHT // 4
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
