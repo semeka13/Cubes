@@ -15,14 +15,16 @@ screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
 
-def update(flag):
+def update():
 
     key = pygame.key.get_pressed()
     if key[pygame.K_ESCAPE]:
         pygame.quit()
         sys.exit()
-    elif key[pygame.K_SPACE] or key[pygame.K_RETURN] and flag:
-        print('игра начата')  # начинаем игру
+    elif key[pygame.K_SPACE] or key[pygame.K_RETURN]:
+        print('игра начата')
+        # начинаем игру
+        return True
 
 
 def start_screen():
@@ -48,7 +50,7 @@ def start_screen():
     run = True
 
     while run:
-        update(flag)
+        update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

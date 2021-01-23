@@ -1,10 +1,12 @@
+import sys
+
 import pygame
 from pygame.locals import *
 
 pygame.init()
 
-screen_width = 700
-screen_height = 700
+screen_width = 1000
+screen_height = 1000
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Dungeon Master')
@@ -23,6 +25,37 @@ def draw_grid():
         pygame.draw.line(screen, (255, 255, 255), (line * tile_size, 0), (line * tile_size, screen_height))
 
 
+class StartWindow:
+    def update(self):
+        intro_text = ["Dungeon Master", "",
+                      "Game rules: get to the finish line alive", "",
+                      "Press <Enter> or <Space> to Start",
+                      "Press <Esc> to Exit"]
+
+        fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
+        screen.blit(fon, (0, 0))
+        font = pygame.font.SysFont(
+            'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 30)
+        text_coord = 50
+        for line in intro_text:
+            string_rendered = font.render(line, 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect()
+            text_coord += 10
+            intro_rect.top = text_coord
+            intro_rect.x = 10
+            text_coord += intro_rect.height
+            screen.blit(string_rendered, intro_rect)
+        key = pygame.key.get_pressed()
+        if key[pygame.K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+        elif key[pygame.K_SPACE] or key[pygame.K_RETURN]:
+            print('игра начата')
+            # начинаем игру
+            return True
+
+
+
 class Player:
     def __init__(self, x, y):
         player = pygame.image.load('../images/player.png')
@@ -30,6 +63,8 @@ class Player:
         self.rect = self.player.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.width = self.player.get_width()
+        self.height = self.player.get_height()
         self.y_inc = 0
         self.jump = False
 
@@ -39,10 +74,13 @@ class Player:
         y_change = 0
 
         key = pygame.key.get_pressed()
-        if (key[pygame.K_SPACE] and not self.jump) or (key[pygame.K_w] and not self.jump):
+        print(self.y_inc)
+        if ((key[pygame.K_SPACE] and not self.jump) or
+                (key[pygame.K_w] and not self.jump) or
+                (key[pygame.K_UP] and not self.jump)) and y_change == 0:
             self.y_inc = -15
             self.jump = True
-        if not key[pygame.K_SPACE] and not key[pygame.K_w]:
+        if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
             self.jump = False
         if key[pygame.K_LEFT] or key[pygame.K_a]:
             x_change -= 5
@@ -56,7 +94,20 @@ class Player:
         y_change += self.y_inc
 
         # check for collision
-
+        for tile in world.tile_list:
+            # check for collision in x direction
+            if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
+                x_change = 0
+            # check for collision in y direction
+            if tile[1].colliderect(self.rect.x, self.rect.y + y_change, self.width, self.height):
+                # check if below the ground i.e. jumping
+                if self.y_inc < 0:
+                    y_change = tile[1].bottom - self.rect.top
+                    self.y_inc = 0
+                # check if above the ground i.e. falling
+                elif self.y_inc >= 0:
+                    y_change = tile[1].top - self.rect.bottom
+                    self.y_inc = 0
         # update player coordinates
         self.rect.x += x_change
         self.rect.y += y_change
@@ -64,6 +115,14 @@ class Player:
         if self.rect.bottom > screen_height:
             self.rect.bottom = screen_height
             y_change = 0
+        if self.rect.right > screen_width:
+            self.rect.right = screen_width
+
+        if self.rect.top < 0:
+            self.rect.bottom = 0
+
+        if self.rect.left < 0:
+            self.rect.bottom = 0
 
         # draw player onto screen
         screen.blit(self.player, self.rect)
@@ -74,7 +133,7 @@ class World:
         self.tile_list = []
 
         # load images
-        dirt_img = pygame.image.load('../images/platform.png')
+        dirt_img = pygame.image.load('../images/platform_1.png')
         # grass_img = pygame.image.load('img/grass.png')
 
         row_count = 0
@@ -95,6 +154,7 @@ class World:
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
+
 world_data = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -113,11 +173,13 @@ world_data = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 2, 2, 2, 2, 2, 1],
     [1, 0, 0, 0, 0, 0, 2, 2, 2, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
+start_screen = StartWindow()
+start_flag = True
 player = Player(100, screen_height - 130)
 world = World(world_data)
 clock = pygame.time.Clock()
@@ -127,10 +189,14 @@ while run:
 
     screen.blit(lava_img, (0, 0))
     # screen.blit(sun_img, (100, 100))
-
-    world.draw()
-    player.update()
-    draw_grid()
+    if start_flag:
+        next = start_screen.update()
+        if next:
+            start_flag = False
+    else:
+        world.draw()
+        player.update()
+        draw_grid()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
