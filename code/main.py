@@ -55,7 +55,6 @@ class StartWindow:
             return True
 
 
-
 class Player:
     def __init__(self, x, y):
         player = pygame.image.load('../images/player.png')
@@ -74,10 +73,9 @@ class Player:
         y_change = 0
 
         key = pygame.key.get_pressed()
-        print(self.y_inc)
         if ((key[pygame.K_SPACE] and not self.jump) or
                 (key[pygame.K_w] and not self.jump) or
-                (key[pygame.K_UP] and not self.jump)) and y_change == 0:
+                (key[pygame.K_UP] and not self.jump)) and not self.in_air:
             self.y_inc = -15
             self.jump = True
         if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
@@ -92,8 +90,8 @@ class Player:
         if self.y_inc > 10:
             self.y_inc = 10
         y_change += self.y_inc
-
         # check for collision
+        self.in_air = True
         for tile in world.tile_list:
             # check for collision in x direction
             if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
@@ -108,6 +106,7 @@ class Player:
                 elif self.y_inc >= 0:
                     y_change = tile[1].top - self.rect.bottom
                     self.y_inc = 0
+                    self.in_air = False
         # update player coordinates
         self.rect.x += x_change
         self.rect.y += y_change
@@ -119,10 +118,10 @@ class Player:
             self.rect.right = screen_width
 
         if self.rect.top < 0:
-            self.rect.bottom = 0
+            self.rect.top = 0
 
         if self.rect.left < 0:
-            self.rect.bottom = 0
+            self.rect.left = 0
 
         # draw player onto screen
         screen.blit(self.player, self.rect)
@@ -196,7 +195,7 @@ while run:
     else:
         world.draw()
         player.update()
-        draw_grid()
+        # draw_grid()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
