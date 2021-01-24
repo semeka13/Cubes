@@ -113,8 +113,10 @@ class Player:
         self.rect.y += y_change
 
         if self.rect.bottom > screen_height:
-            self.rect.bottom = screen_height
+            # self.rect.bottom = screen_height
             y_change = 0
+            sys.exit()
+
         if self.rect.right > screen_width:
             self.rect.right = screen_width
 
@@ -126,6 +128,26 @@ class Player:
 
         # draw player onto screen
         screen.blit(self.player, self.rect)
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('../images/enemy.png')
+        self.image = pygame.transform.scale(self.image, (40, 40))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = 1
+        self.count = 0
+
+    def update(self):
+        self.rect.x += self.direction
+        self.count += 1
+        if not (-tile_size * 2 < self.count < tile_size * 2):
+            print(111)
+            self.direction *= -1
+            self.count *= -1
 
 
 class World:
@@ -153,6 +175,11 @@ class World:
                     player_start_pos_x = col_count * tile_size
                     player_start_pos_y = row_count * tile_size
                     pos = (player_start_pos_x, player_start_pos_y)
+                if tile == "!":
+                    enemy_start_pos_x = col_count * tile_size
+                    enemy_start_pos_y = row_count * tile_size + 10
+                    enemy = Enemy(enemy_start_pos_x, enemy_start_pos_y)
+                    enemy_group.add(enemy)
                 col_count += 1
             row_count += 1
         return pos
@@ -177,6 +204,7 @@ def load_level(filename):
     return new_level
 
 
+enemy_group = pygame.sprite.Group()
 start_screen = StartWindow()
 start_flag = True
 world_data = load_level('level_test')
@@ -188,13 +216,15 @@ clock = pygame.time.Clock()
 run = True
 while run:
     screen.blit(lava_img, (0, 0))
-    # screen.blit(sun_img, (100, 100))
     if start_flag:
         next = start_screen.update()
         if next:
             start_flag = False
     else:
         world.draw()
+
+        enemy_group.update()
+        enemy_group.draw(screen)
         player.update()
         # draw_grid()
 
