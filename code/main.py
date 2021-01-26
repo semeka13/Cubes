@@ -56,22 +56,26 @@ class StartWindow:
 
 class Player:
     def __init__(self, x, y):
-        player = pygame.image.load('../images/player.png')
-        self.player = pygame.transform.scale(player, (40, 40))
-        self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave.png"), (30, 60))
+        self.player_image_l = pygame.transform.flip(pygame.image.load('../images/player.png'), True, False)
+        self.player_image_r = pygame.image.load('../images/player.png')
+        self.player = pygame.transform.scale(self.player_image_r, (40, 40))
+        self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave_2.png"), (75, 75))
         self.rect = self.player.get_rect()
         self.rect.x = x
-        self.rect.y = y
+        self.rect.y = y - 20
         self.width = self.player.get_width()
         self.height = self.player.get_height()
         self.y_inc = 0
         self.jump = False
         self.in_air = True
         self.dead = False
+        self.right_flip = False
+        self.left_flip = False
 
     def update(self, game_over):
         x_change = 0
         y_change = 0
+
         if not game_over:
             key = pygame.key.get_pressed()
             if ((key[pygame.K_SPACE] and not self.jump) or
@@ -83,8 +87,17 @@ class Player:
                 self.jump = False
             if key[pygame.K_LEFT] or key[pygame.K_a]:
                 x_change -= 5
+                self.left_flip = True
+                self.right_flip = False
             if key[pygame.K_RIGHT] or key[pygame.K_d]:
                 x_change += 5
+                self.right_flip = True
+                self.left_flip = False
+
+            if self.left_flip:
+                self.player = pygame.transform.scale(self.player_image_l, (40, 40))
+            if self.right_flip:
+                self.player = pygame.transform.scale(self.player_image_r, (40, 40))
 
             self.y_inc += 1
             if self.y_inc > 10:
@@ -109,8 +122,7 @@ class Player:
             self.rect.y += y_change
 
             if self.rect.bottom > screen_height:
-                y_change = 0
-                sys.exit()
+                self.rect.y = 0
 
             if self.rect.right > screen_width:
                 self.rect.right = screen_width
@@ -124,32 +136,44 @@ class Player:
             self.player = self.grave_img
             self.dead = True
             self.rect.y += 5
-            
-
-
         screen.blit(self.player, self.rect)
-
         return game_over
 
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('../images/enemy.png')
-        self.image = pygame.transform.scale(self.image, (40, 40))
+        self.image_l = pygame.transform.flip(pygame.image.load('../images/enemy_3.png'), True, False)
+        self.image_r = pygame.image.load('../images/enemy_3.png')
+        self.image = pygame.transform.scale(self.image_r, (40, 60))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.direction = 1
-        self.count = 0
+        self.right_flip = True
+        self.left_flip = False
+        self.counter_r = 0
+        self.counter_l = 0
 
     def update(self):
-        self.rect.x += self.direction
-        self.count += 1
-        if not (-tile_size * 2 < self.count < tile_size * 2):
-            print(111)
-            self.direction *= -1
-            self.count *= -1
+        if self.counter_r <= 100:
+            self.rect.x += 1
+            self.counter_r += 1
+            self.right_flip = True
+            self.left_flip = False
+            if self.counter_r == 100:
+                self.counter_l = 100
+        else:
+            self.rect.x -= 1
+            self.counter_l -= 1
+            self.right_flip = False
+            self.left_flip = True
+            if self.counter_l == 0:
+                self.counter_r = 0
+
+        if self.left_flip:
+            self.image = pygame.transform.scale(self.image_l, (40, 60))
+        if self.right_flip:
+            self.image = pygame.transform.scale(self.image_r, (40, 60))
 
 
 class World:
@@ -157,8 +181,10 @@ class World:
         self.tile_list = []
         pos = 0
         tile_images = {
-           'platform_1': pygame.image.load('../images/platform_1.png'),
-           'killer_block': pygame.image.load('../images/spikes.png')
+            'platform_1': pygame.image.load('../images/platform_1.png'),
+            'killer_block': pygame.image.load('../images/spikes.png'),
+            'platform_r_t': pygame.image.load('../images/platform_right_top_1.png'),
+            'platform_l_t': pygame.image.load('../images/platform_left_top.png')
         }
 
         row_count = 0
@@ -172,13 +198,27 @@ class World:
                     img_rect.y = row_count * tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
+                if tile == '(':
+                    img = pygame.transform.scale(tile_images['platform_l_t'], (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
+                if tile == ')':
+                    img = pygame.transform.scale(tile_images['platform_r_t'], (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
                 if tile == '@':
                     player_start_pos_x = col_count * tile_size
                     player_start_pos_y = row_count * tile_size
                     pos = (player_start_pos_x, player_start_pos_y)
                 if tile == "!":
                     enemy_start_pos_x = col_count * tile_size
-                    enemy_start_pos_y = row_count * tile_size + 10
+                    enemy_start_pos_y = row_count * tile_size - 10
                     enemy = Enemy(enemy_start_pos_x, enemy_start_pos_y)
                     enemy_group.add(enemy)
                 col_count += 1
@@ -210,6 +250,7 @@ world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
+
 
 run = True
 while run:
