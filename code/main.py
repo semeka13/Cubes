@@ -13,7 +13,7 @@ pygame.display.set_caption('Dungeon Master')
 
 # define game variables
 tile_size = 50
-
+game_over = False
 # load images
 cave_img = pygame.image.load('../images/cave_bk.png')
 lava_img = pygame.image.load('../images/lava_bk.png')
@@ -51,7 +51,6 @@ class StartWindow:
             sys.exit()
         elif key[pygame.K_RETURN]:
             print('игра начата')
-            # начинаем игру
             return True
 
 
@@ -59,6 +58,7 @@ class Player:
     def __init__(self, x, y):
         player = pygame.image.load('../images/player.png')
         self.player = pygame.transform.scale(player, (40, 40))
+        self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave.png"), (30, 60))
         self.rect = self.player.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -67,67 +67,69 @@ class Player:
         self.y_inc = 0
         self.jump = False
         self.in_air = True
+        self.dead = False
 
-    def update(self):
+    def update(self, game_over):
         x_change = 0
         y_change = 0
+        if not game_over:
+            key = pygame.key.get_pressed()
+            if ((key[pygame.K_SPACE] and not self.jump) or
+                    (key[pygame.K_w] and not self.jump) or
+                    (key[pygame.K_UP] and not self.jump)) and not self.in_air:
+                self.y_inc = -15
+                self.jump = True
+            if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
+                self.jump = False
+            if key[pygame.K_LEFT] or key[pygame.K_a]:
+                x_change -= 5
+            if key[pygame.K_RIGHT] or key[pygame.K_d]:
+                x_change += 5
 
-        key = pygame.key.get_pressed()
-        if ((key[pygame.K_SPACE] and not self.jump) or
-                (key[pygame.K_w] and not self.jump) or
-                (key[pygame.K_UP] and not self.jump)) and not self.in_air:
-            self.y_inc = -15
-            self.jump = True
-        if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
-            self.jump = False
-        if key[pygame.K_LEFT] or key[pygame.K_a]:
-            x_change -= 5
-        if key[pygame.K_RIGHT] or key[pygame.K_d]:
-            x_change += 5
+            self.y_inc += 1
+            if self.y_inc > 10:
+                self.y_inc = 10
+            y_change += self.y_inc
+            self.in_air = True
+            for tile in world.tile_list:
+                if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
+                    x_change = 0
+                if tile[1].colliderect(self.rect.x, self.rect.y + y_change, self.width, self.height):
+                    if self.y_inc < 0:
+                        y_change = tile[1].bottom - self.rect.top
+                        self.y_inc = 0
+                    elif self.y_inc >= 0:
+                        y_change = tile[1].top - self.rect.bottom
+                        self.y_inc = 0
+                        self.in_air = False
+            if pygame.sprite.spritecollide(self, enemy_group, False):
+                game_over = True
 
-            # add gravity
-        self.y_inc += 1
-        if self.y_inc > 10:
-            self.y_inc = 10
-        y_change += self.y_inc
-        # check for collision
-        self.in_air = True
-        for tile in world.tile_list:
-            # check for collision in x direction
-            if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
-                x_change = 0
-            # check for collision in y direction
-            if tile[1].colliderect(self.rect.x, self.rect.y + y_change, self.width, self.height):
-                # check if below the ground i.e. jumping
-                if self.y_inc < 0:
-                    y_change = tile[1].bottom - self.rect.top
-                    self.y_inc = 0
-                # check if above the ground i.e. falling
-                elif self.y_inc >= 0:
-                    y_change = tile[1].top - self.rect.bottom
-                    self.y_inc = 0
-                    self.in_air = False
+            self.rect.x += x_change
+            self.rect.y += y_change
 
-        # update player coordinates
-        self.rect.x += x_change
-        self.rect.y += y_change
+            if self.rect.bottom > screen_height:
+                y_change = 0
+                sys.exit()
 
-        if self.rect.bottom > screen_height:
-            # self.rect.bottom = screen_height
-            y_change = 0
-            sys.exit()
+            if self.rect.right > screen_width:
+                self.rect.right = screen_width
 
-        if self.rect.right > screen_width:
-            self.rect.right = screen_width
+            if self.rect.top < 0:
+                self.rect.top = 0
 
-        if self.rect.top < 0:
-            self.rect.top = 0
+            if self.rect.left < 0:
+                self.rect.left = 0
+        elif game_over and not self.dead:
+            self.player = self.grave_img
+            self.dead = True
+            self.rect.y += 5
+            
 
-        if self.rect.left < 0:
-            self.rect.left = 0
 
-        # draw player onto screen
         screen.blit(self.player, self.rect)
+
+        return game_over
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -154,7 +156,6 @@ class World:
     def world_plan(self, data):
         self.tile_list = []
         pos = 0
-        # load images
         tile_images = {
            'platform_1': pygame.image.load('../images/platform_1.png'),
            'killer_block': pygame.image.load('../images/spikes.png')
@@ -191,14 +192,11 @@ class World:
 
 def load_level(filename):
     filename = "../levels/" + filename
-    # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
 
-    # и подсчитываем максимальную длину
     max_width = max(map(len, level_map))
 
-    # дополняем каждую строку пустыми клетками ('.')
     new_level = list(map(lambda x: x.ljust(max_width, '.'), level_map))
     print(new_level)
     return new_level
@@ -223,9 +221,11 @@ while run:
     else:
         world.draw()
 
-        enemy_group.update()
+        if not game_over:
+            enemy_group.update()
+
         enemy_group.draw(screen)
-        player.update()
+        game_over = player.update(game_over)
         # draw_grid()
 
     for event in pygame.event.get():
