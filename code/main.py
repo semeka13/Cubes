@@ -38,7 +38,7 @@ def draw_coins(score):
     coin_black = pygame.transform.scale(pygame.image.load('../images/coin_black.png'), (tile_size, tile_size))
     data = [coin_black] * (3 - score) + [coin] * score
     for img in range(len(data)):
-        screen.blit(data[img], (screen_width - 100 - (50 * img), screen_height - 900))
+        screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img), screen_height - (19 * tile_size)))
 
 
 def draw_hearts():
@@ -172,6 +172,14 @@ class Player:
         return game_over
 
 
+
+class DeathTile(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load('../images/spikes.png'), (tile_size, tile_size))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -272,6 +280,11 @@ class World:
                     coin_pos_y = row_count * tile_size + 20
                     coin = Coin(coin_pos_x, coin_pos_y)
                     coin_group.add(coin)
+                if tile == "+":
+                    death_block_pos_x = col_count * tile_size
+                    death_block_pos_y = row_count * tile_size + 20
+                    death_block = DeathTile(death_block_pos_x, death_block_pos_y)
+                    death_tile_group.add(death_block)
                 col_count += 1
             row_count += 1
         return pos
@@ -293,6 +306,7 @@ def load_level(filename):
     return new_level
 
 
+death_tile_group = pygame.sprite.Group()
 coin_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 start_screen = StartWindow()
@@ -316,6 +330,7 @@ while run:
 
         if not game_over:
             enemy_group.update()
+        death_tile_group.draw(screen)
         coin_group.update()
         coin_group.draw(screen)
         score = collide_coin(score)
