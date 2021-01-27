@@ -41,6 +41,14 @@ def draw_coins(score):
         screen.blit(data[img], (screen_width - 100 - (50 * img), screen_height - 900))
 
 
+def draw_hearts():
+    heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
+    heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
+    data = [heart_empty] * 3 + [heart_full]
+    for img in range(len(data)):
+        screen.blit(data[img], (screen_width - 100 - (50 * img), screen_height - 960))
+
+
 class StartWindow:
     def update(self):
         intro_text = ["Dungeon Master", "",
@@ -77,6 +85,7 @@ class Player:
         self.player = pygame.transform.scale(self.player_image_r, (40, 40))
         self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave_2.png"), (75, 75))
         self.rect = self.player.get_rect()
+        self.start_pos = (x, y)
         self.rect.x = x
         self.rect.y = y - 20
         self.width = self.player.get_width()
@@ -87,6 +96,7 @@ class Player:
         self.dead = False
         self.right_flip = False
         self.left_flip = False
+        self.hp = 3
 
     def update(self, game_over):
         x_change = 0
@@ -132,13 +142,19 @@ class Player:
                         self.y_inc = 0
                         self.in_air = False
             if pygame.sprite.spritecollide(self, enemy_group, False):
+                self.hp -= 1
+                if self.hp != 0:
+                    self.rect.x, self.rect.y = self.start_pos
+
+            if self.hp == 0:
                 game_over = True
 
             self.rect.x += x_change
             self.rect.y += y_change
 
             if self.rect.bottom > screen_height:
-                self.rect.y = 0
+                self.rect.x, self.rect.y = self.start_pos
+                self.hp -= 1
 
             if self.rect.right > screen_width:
                 self.rect.right = screen_width
@@ -200,9 +216,11 @@ class Coin(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
+
 class EarnedCoins:
     def __init__(self, x, y):
         self.coin = pygame.image.load('../images/coin.png')
+
 
 class World:
     def world_plan(self, data):
@@ -303,6 +321,7 @@ while run:
         score = collide_coin(score)
         enemy_group.draw(screen)
         draw_coins(score)
+        draw_hearts()
         game_over = player.update(game_over)
         # draw_grid()
 
