@@ -44,7 +44,7 @@ def draw_coins(score):
 def draw_hearts():
     heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
     heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
-    data = [heart_full] * hp + [heart_empty] * (3 - hp)
+    data =  [heart_full] * hp + [heart_empty] * (3 - hp)
     for img in range(len(data)):
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
@@ -80,6 +80,36 @@ class StartWindow:
             return True
 
 
+class Button():
+    def __init__(self, x, y):
+        self.img = pygame.image.load('../images/spikes.png')
+        self.image = pygame.transform.scale(self.img, (tile_size * 2, tile_size * 2))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def draw(self):
+        action = False
+
+        # get mouse position
+        pos = pygame.mouse.get_pos()
+
+        # check mouseover and clicked conditions
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        # draw button
+        screen.blit(self.image, self.rect)
+
+        return action
+
+
 class Player:
     def __init__(self, x, y):
         self.player_image_l = pygame.transform.flip(pygame.image.load('../images/player.png'), True, False)
@@ -110,9 +140,8 @@ class Player:
             if ((key[pygame.K_SPACE] and not self.jump) or
                     (key[pygame.K_w] and not self.jump) or
                     (key[pygame.K_UP] and not self.jump)) and not self.in_air:
-                if self.jump
-                self.y_inc = -15
-                self.jump = True
+                    self.y_inc = -15
+                    self.jump = True
             if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
                 self.jump = False
             if key[pygame.K_LEFT] or key[pygame.K_a]:
@@ -318,7 +347,7 @@ world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
-
+restart_button = Button(screen_width // 2 - 50, screen_height // 2 + 100)
 
 run = True
 while run:
@@ -332,6 +361,12 @@ while run:
 
         if hp != 0:
             enemy_group.update()
+
+        if hp == 0:
+            if restart_button.draw():
+                player = Player(*player_pos)
+                hp = 3
+
         death_tile_group.draw(screen)
         coin_group.update()
         coin_group.draw(screen)
