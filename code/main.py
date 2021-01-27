@@ -32,6 +32,14 @@ def collide_coin(score):
     return score
 
 
+def draw_coins(score):
+    coin = pygame.transform.scale(pygame.image.load('../images/coin.png'), (tile_size, tile_size))
+    coin_black = pygame.transform.scale(pygame.image.load('../images/coin_black.png'), (tile_size, tile_size))
+    data = [coin_black] * (3 - score) + [coin] * score
+    for img in range(len(data)):
+        screen.blit(data[img], (screen_width - 100 - (50 * img), screen_height - 900))
+
+
 class StartWindow:
     def update(self):
         intro_text = ["Dungeon Master", "",
@@ -186,11 +194,14 @@ class Enemy(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('../images/dollar.png')
+        img = pygame.image.load('../images/coin.png')
         self.image = pygame.transform.scale(img, (tile_size - 10, tile_size - 10))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
+class EarnedCoins:
+    def __init__(self, x, y):
+        self.coin = pygame.image.load('../images/coin.png')
 
 class World:
     def world_plan(self, data):
@@ -290,6 +301,7 @@ while run:
         coin_group.draw(screen)
         score = collide_coin(score)
         enemy_group.draw(screen)
+        draw_coins(score)
         game_over = player.update(game_over)
         # draw_grid()
 
