@@ -44,7 +44,7 @@ def draw_coins(score):
 def draw_hearts():
     heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
     heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
-    data =  [heart_full] * hp + [heart_empty] * (3 - hp)
+    data = [heart_full] * hp + [heart_empty] * (3 - hp)
     for img in range(len(data)):
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
@@ -175,9 +175,11 @@ class Player:
 class DeathTile(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('../images/spikes.png'), (tile_size, tile_size))
+        self.image = pygame.transform.scale(pygame.image.load('../images/lava_top.png'), (tile_size, tile_size))
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+        self.rect.x = x
+        self.rect.y = y
+
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -274,9 +276,9 @@ class World:
                     coin_pos_y = row_count * tile_size + 20
                     coin = Coin(coin_pos_x, coin_pos_y)
                     coin_group.add(coin)
-                if tile == "+":
+                if tile == "-":
                     death_block_pos_x = col_count * tile_size
-                    death_block_pos_y = row_count * tile_size + 20
+                    death_block_pos_y = row_count * tile_size
                     death_block = DeathTile(death_block_pos_x, death_block_pos_y)
                     death_tile_group.add(death_block)
                 col_count += 1
