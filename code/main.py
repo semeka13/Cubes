@@ -99,6 +99,7 @@ class Player:
         self.right_flip = False
         self.left_flip = False
         self.hp = 3
+        self.jump_count = 0
 
     def update(self):
         x_change = 0
@@ -109,6 +110,7 @@ class Player:
             if ((key[pygame.K_SPACE] and not self.jump) or
                     (key[pygame.K_w] and not self.jump) or
                     (key[pygame.K_UP] and not self.jump)) and not self.in_air:
+                if self.jump
                 self.y_inc = -15
                 self.jump = True
             if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
@@ -143,10 +145,14 @@ class Player:
                         y_change = tile[1].top - self.rect.bottom
                         self.y_inc = 0
                         self.in_air = False
-            if pygame.sprite.spritecollide(self, enemy_group, False):
-                self.hp -= 1
-                if self.hp != 0:
-                    self.rect.x, self.rect.y = self.start_pos
+            collisions = [enemy_group, death_tile_group]
+            for group in collisions:
+                if pygame.sprite.spritecollide(self, group, False):
+                    pygame.time.wait(100)
+                    self.hp -= 1
+                    if self.hp != 0:
+                        self.rect.x, self.rect.y = self.start_pos
+
 
             self.rect.x += x_change
             self.rect.y += y_change
