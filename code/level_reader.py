@@ -16,9 +16,22 @@ pygame.display.set_caption('Dungeon Master')
 tile_size = 50
 score = 0
 hp = 3
+max_level = 3
+cur_level = 1
 # load images
 cave_img = pygame.image.load('../images/cave_bk.png')
 lava_img = pygame.image.load('../images/lava_bk.png')
+
+
+def reset_world(level):
+    door_group.empty()
+    enemy_group.empty()
+    coin_group.empty()
+    death_tile_group.empty()
+    level_data = load_level(f"level_{level}")
+    return level_data
+
+
 
 
 def draw_grid():
@@ -44,7 +57,7 @@ def draw_coins(score):
 def draw_hearts():
     heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
     heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
-    data =  [heart_full] * hp + [heart_empty] * (3 - hp)
+    data = [heart_full] * hp + [heart_empty] * (3 - hp)
     for img in range(len(data)):
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
@@ -94,9 +107,10 @@ class Button():
 
 
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x, y, hp=3):
         self.player_image_l = pygame.transform.flip(pygame.image.load('../images/player.png'), True, False)
         self.player_image_r = pygame.image.load('../images/player.png')
+        self.player_height = 40
         self.player = pygame.transform.scale(self.player_image_r, (40, 40))
         self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave_2.png"), (75, 75))
         self.rect = self.player.get_rect()
@@ -111,7 +125,7 @@ class Player:
         self.dead = False
         self.right_flip = False
         self.left_flip = False
-        self.hp = 3
+        self.hp = hp
         self.jump_count = 0
 
     def update(self):
@@ -164,6 +178,9 @@ class Player:
                     self.hp -= 1
                     if self.hp != 0:
                         self.rect.x, self.rect.y = self.start_pos
+            if pygame.sprite.spritecollide(self, door_group, False):
+                pygame.time.wait(100)
+                self.hp = str(f"0{self.hp}")
 
 
             self.rect.x += x_change
@@ -232,6 +249,16 @@ class Enemy(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image_l, (35, 55))
         if self.right_flip:
             self.image = pygame.transform.scale(self.image_r, (35, 55))
+
+
+class Door(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load('../images/finish.png')
+        self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 
 class Coin(pygame.sprite.Sprite):
@@ -306,6 +333,11 @@ class World:
                     death_block_pos_y = row_count * tile_size
                     death_block = DeathTile(death_block_pos_x, death_block_pos_y)
                     death_tile_group.add(death_block)
+                if tile == "0":
+                    door_pos_x = col_count * tile_size
+                    door_pos_y = row_count * tile_size
+                    door = Door(door_pos_x, door_pos_y)
+                    door_group.add(door)
                 col_count += 1
             row_count += 1
         return pos
@@ -327,6 +359,7 @@ def load_level(filename):
     return new_level
 
 
+door_group = pygame.sprite.Group()
 death_tile_group = pygame.sprite.Group()
 coin_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
@@ -337,7 +370,7 @@ world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
-restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png', 2, 2)
+restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png' , 2, 2)
 exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
 start_button = Button(screen_width // 2 - 110, screen_height // 2 - 150, '../images/start_button.png', 5, 2)
 exit_button_main = Button(screen_width // 2 - 110, screen_height // 2, '../images/exit_button_main.png', 5, 2)
@@ -359,12 +392,21 @@ while run:
 
         if hp == 0:
             if restart_button.draw():
-                player = Player(*player_pos)
+                hp = 3
+                player = Player(*player_pos, hp=hp)
             if exit_button.draw():
                 start_screen = StartWindow()
+                player = Player(*player_pos, hp=hp)
                 start_flag = True
-                player = Player(*player_pos)
-
+        if len(str(hp)) == 2:
+            if cur_level + 1 <= max_level:
+                world_data = reset_world(cur_level + 1)
+                world = World()
+                player_pos = world.world_plan(world_data)
+                hp = int(hp[1])
+                player = Player(*player_pos, hp=hp)
+                cur_level += 1
+        door_group.draw(screen)
         death_tile_group.draw(screen)
         coin_group.update()
         coin_group.draw(screen)
