@@ -51,37 +51,23 @@ def draw_hearts():
 
 class StartWindow:
     def update(self):
-        intro_text = ["Dungeon Master", "",
-                      "Game rules: get to the finish line alive", "",
-                      "Press <Enter> to Start",
-                      "Press <Esc> to Exit"]
+        intro_text = "Dungeon Master"
 
         fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
         screen.blit(fon, (0, 0))
         font = pygame.font.SysFont(
-            'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 30)
-        text_coord = screen_height // 4
-        for line in intro_text:
-            string_rendered = font.render(line, 1, pygame.Color('white'))
-            intro_rect = string_rendered.get_rect()
-            text_coord += 10
-            intro_rect.top = text_coord
-            intro_rect.x = 10
-            text_coord += intro_rect.height
-            screen.blit(string_rendered, intro_rect)
-        key = pygame.key.get_pressed()
-        if key[pygame.K_ESCAPE]:
-            pygame.quit()
-            sys.exit()
-        elif key[pygame.K_RETURN]:
-            print('игра начата')
-            return True
+            'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 70)
+        string_rendered = font.render(intro_text, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.x = screen_width // 3 - 110
+        intro_rect.y = screen_height // 7
+        screen.blit(string_rendered, intro_rect)
 
 
 class Button():
-    def __init__(self, x, y, image_name):
+    def __init__(self, x, y, image_name, kx, ky):
         self.img = pygame.image.load(image_name)
-        self.image = pygame.transform.scale(self.img, (tile_size * 2, tile_size * 2))
+        self.image = pygame.transform.scale(self.img, (tile_size * kx, tile_size * ky))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -343,16 +329,20 @@ world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
-restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png')
-exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png')
+restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png' , 2, 2)
+exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
+start_button = Button(screen_width // 2 - 100, screen_height // 2 - 150, '../images/start_button.png', 4, 2)
+exit_button_main = Button(screen_width // 2 - 100, screen_height // 2, '../images/exit_button_main.png', 4, 2)
 
 run = True
 while run:
     screen.blit(lava_img, (0, 0))
     if start_flag:
         next = start_screen.update()
-        if next:
+        if start_button.draw():
             start_flag = False
+        if exit_button_main.draw():
+            run = False
     else:
         world.draw()
 
@@ -362,11 +352,10 @@ while run:
         if hp == 0:
             if restart_button.draw():
                 player = Player(*player_pos)
-                hp = 3
             if exit_button.draw():
                 start_screen = StartWindow()
-                player = Player(*player_pos)
                 start_flag = True
+                player = Player(*player_pos)
 
         death_tile_group.draw(screen)
         coin_group.update()
