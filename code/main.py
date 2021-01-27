@@ -49,6 +49,8 @@ def draw_hearts():
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
 
+
+
 class StartWindow:
     def update(self):
         intro_text = ["Dungeon Master", "",

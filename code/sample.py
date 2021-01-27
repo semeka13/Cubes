@@ -5,69 +5,32 @@
 #player_image = load_image('player.png')
 
 import pygame
-import sys
-from pygame.locals import *
 
-pygame.init()
-FPS = 60
-size = WIDTH, HEIGHT = 800, 400
-screen = pygame.display.set_mode(size)
-clock = pygame.time.Clock()
+class Button():
+	def __init__(self, x, y, image):
+		self.image = image
+		self.rect = self.image.get_rect()
+		self.rect.x = x
+		self.rect.y = y
+		self.clicked = False
 
+	def draw(self):
+		action = False
 
-def update():
+		#get mouse position
+		pos = pygame.mouse.get_pos()
 
-    key = pygame.key.get_pressed()
-    if key[pygame.K_ESCAPE]:
-        pygame.quit()
-        sys.exit()
-    elif key[pygame.K_SPACE] or key[pygame.K_RETURN]:
-        print('игра начата')
-        # начинаем игру
-        return True
+		#check mouseover and clicked conditions
+		if self.rect.collidepoint(pos):
+			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+				action = True
+				self.clicked = True
 
-
-def start_screen():
-    flag = True
-    intro_text = ["Dungeon Master", "",
-                  "Game rules: get to the finish line alive", "",
-                  "Press <Enter> or <Space> to Start",
-                  "Press <Esc> to Exit"]
-
-    fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.SysFont('sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 30)
-    text_coord = HEIGHT // 4
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('white'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    run = True
-
-    while run:
-        update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-
-        pygame.display.update()
-        clock.tick(FPS)
+		if pygame.mouse.get_pressed()[0] == 0:
+			self.clicked = False
 
 
-start_screen()
+		#draw button
+		screen.blit(self.image, self.rect)
 
-
-"""
-обозначение разных спрайтов
-# - платфомы
-. - пустота
-@ - герой
-+ - блок смерти
-$ - финиш
-"""
+		return action
