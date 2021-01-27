@@ -14,8 +14,8 @@ pygame.display.set_caption('Dungeon Master')
 
 # define game variables
 tile_size = 50
-game_over = False
 score = 0
+hp = 3
 # load images
 cave_img = pygame.image.load('../images/cave_bk.png')
 lava_img = pygame.image.load('../images/lava_bk.png')
@@ -44,9 +44,9 @@ def draw_coins(score):
 def draw_hearts():
     heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
     heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
-    data = [heart_empty] * 3 + [heart_full]
+    data = [heart_empty] + [heart_full]
     for img in range(len(data)):
-        screen.blit(data[img], (screen_width - 100 - (50 * img), screen_height - 960))
+        screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img), screen_height - (19 * tile_size)))
 
 
 class StartWindow:
@@ -98,11 +98,11 @@ class Player:
         self.left_flip = False
         self.hp = 3
 
-    def update(self, game_over):
+    def update(self):
         x_change = 0
         y_change = 0
 
-        if not game_over:
+        if self.hp != 0:
             key = pygame.key.get_pressed()
             if ((key[pygame.K_SPACE] and not self.jump) or
                     (key[pygame.K_w] and not self.jump) or
@@ -146,9 +146,6 @@ class Player:
                 if self.hp != 0:
                     self.rect.x, self.rect.y = self.start_pos
 
-            if self.hp == 0:
-                game_over = True
-
             self.rect.x += x_change
             self.rect.y += y_change
 
@@ -164,12 +161,12 @@ class Player:
 
             if self.rect.left < 0:
                 self.rect.left = 0
-        elif game_over and not self.dead:
+        elif self.hp == 0 and not self.dead:
             self.player = self.grave_img
             self.dead = True
             self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
         screen.blit(self.player, self.rect)
-        return game_over
+        return self.hp
 
 
 
@@ -223,11 +220,6 @@ class Coin(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (tile_size - 10, tile_size - 10))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-
-
-class EarnedCoins:
-    def __init__(self, x, y):
-        self.coin = pygame.image.load('../images/coin.png')
 
 
 class World:
@@ -328,7 +320,7 @@ while run:
     else:
         world.draw()
 
-        if not game_over:
+        if hp != 0:
             enemy_group.update()
         death_tile_group.draw(screen)
         coin_group.update()
@@ -337,7 +329,7 @@ while run:
         enemy_group.draw(screen)
         draw_coins(score)
         draw_hearts()
-        game_over = player.update(game_over)
+        hp = player.update()
         # draw_grid()
 
     for event in pygame.event.get():
