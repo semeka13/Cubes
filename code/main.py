@@ -38,7 +38,7 @@ def draw_coins(score):
     coin_black = pygame.transform.scale(pygame.image.load('../images/coin_black.png'), (tile_size, tile_size))
     data = [coin_black] * (3 - score) + [coin] * score
     for img in range(len(data)):
-        screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img), screen_height - (19 * tile_size)))
+        screen.blit(data[img], (screen_width - (2 * tile_size) - (54 * img), screen_height - (18.5 * tile_size)))
 
 
 def draw_hearts():
