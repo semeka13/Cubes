@@ -14,6 +14,7 @@ pygame.display.set_caption('Dungeon Master')
 # define game variables
 tile_size = 50
 game_over = False
+score = 0
 # load images
 cave_img = pygame.image.load('../images/cave_bk.png')
 lava_img = pygame.image.load('../images/lava_bk.png')
@@ -23,6 +24,12 @@ def draw_grid():
     for line in range(0, 20):
         pygame.draw.line(screen, (255, 255, 255), (0, line * tile_size), (screen_width, line * tile_size))
         pygame.draw.line(screen, (255, 255, 255), (line * tile_size, 0), (line * tile_size, screen_height))
+
+
+def collide_coin(score):
+    if pygame.sprite.spritecollide(player, coin_group, True):
+        score += 1
+    return score
 
 
 class StartWindow:
@@ -176,6 +183,15 @@ class Enemy(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image_r, (35, 55))
 
 
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load('../images/dollar.png')
+        self.image = pygame.transform.scale(img, (tile_size - 10, tile_size - 10))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+
 class World:
     def world_plan(self, data):
         self.tile_list = []
@@ -221,6 +237,11 @@ class World:
                     enemy_start_pos_y = row_count * tile_size - 10
                     enemy = Enemy(enemy_start_pos_x, enemy_start_pos_y)
                     enemy_group.add(enemy)
+                if tile == "$":
+                    coin_pos_x = col_count * tile_size
+                    coin_pos_y = row_count * tile_size + 20
+                    coin = Coin(coin_pos_x, coin_pos_y)
+                    coin_group.add(coin)
                 col_count += 1
             row_count += 1
         return pos
@@ -242,6 +263,7 @@ def load_level(filename):
     return new_level
 
 
+coin_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 start_screen = StartWindow()
 start_flag = True
@@ -264,7 +286,9 @@ while run:
 
         if not game_over:
             enemy_group.update()
-
+        coin_group.update()
+        coin_group.draw(screen)
+        score = collide_coin(score)
         enemy_group.draw(screen)
         game_over = player.update(game_over)
         # draw_grid()
