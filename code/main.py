@@ -56,9 +56,8 @@ def draw_coins(score):
 
 def draw_hearts():
     heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
-    heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'),
-                                         (tile_size - 10, tile_size - 10))
-    data = [heart_full] * hp + [heart_empty] * (3 - hp)
+    heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
+    data =  [heart_full] * hp + [heart_empty] * (3 - hp)
     for img in range(len(data)):
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
@@ -81,7 +80,7 @@ class StartWindow:
 class Button():
     def __init__(self, x, y, image_name, kx, ky):
         self.img = pygame.image.load(image_name)
-        self.image = pygame.transform.scale(self.img, (tile_size * 2, tile_size * 2))
+        self.image = pygame.transform.scale(self.img, (tile_size * kx, tile_size * ky))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -279,7 +278,8 @@ class World:
             'platform_1': pygame.image.load('../images/platform_1.png'),
             'killer_block': pygame.image.load('../images/spikes.png'),
             'platform_r_t': pygame.image.load('../images/platform_right_top_1.png'),
-            'platform_l_t': pygame.image.load('../images/platform_left_top.png')
+            'platform_l_t': pygame.image.load('../images/platform_left_top.png'),
+            'platform_c': pygame.image.load('../images/platform_center.png'),
         }
 
         row_count = 0
@@ -288,6 +288,13 @@ class World:
             for tile in row:
                 if tile == '#':
                     img = pygame.transform.scale(tile_images['platform_1'], (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
+                if tile == '_':
+                    img = pygame.transform.scale(tile_images['platform_c'], (tile_size, tile_size))
                     img_rect = img.get_rect()
                     img_rect.x = col_count * tile_size
                     img_rect.y = row_count * tile_size
@@ -365,9 +372,8 @@ player = Player(*player_pos)
 clock = pygame.time.Clock()
 restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png' , 2, 2)
 exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
-start_button = Button(screen_width // 2 - 100, screen_height // 2 - 150, '../images/start_button.png', 5, 2)
-exit_button_main = Button(screen_width // 2 - 100, screen_height // 2, '../images/exit_button_main.png', 5, 2)
-
+start_button = Button(screen_width // 2 - 110, screen_height // 2 - 150, '../images/start_button.png', 5, 2)
+exit_button_main = Button(screen_width // 2 - 110, screen_height // 2, '../images/exit_button_main.png', 5, 2)
 
 run = True
 while run:
@@ -418,3 +424,5 @@ while run:
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
+
+
