@@ -1,3 +1,4 @@
+
 import sys
 
 import pygame
@@ -203,21 +204,6 @@ class EarnedCoins:
     def __init__(self, x, y):
         self.coin = pygame.image.load('../images/coin.png')
 
-
-class Lifes():
-    def __init__(self):
-        image = pygame.image.load('../images/heart.png')
-        image_empty = pygame.image.load('../images/heart_empty.png')
-        self.heart_full = pygame.transform.scale(image, (tile_size - 10, tile_size - 10))
-        self.heart_empty = pygame.transform.scale(image_empty, (tile_size - 10, tile_size - 10))
-
-    def heart(self):
-        screen.blit(self.heart_full, (screen_width - 100, screen_height - 960))
-        screen.blit(self.heart_full, (screen_width - 150, screen_height - 960))
-        screen.blit(self.heart_empty, (screen_width - 200, screen_height - 960))
-
-
-
 class World:
     def world_plan(self, data):
         self.tile_list = []
@@ -316,6 +302,7 @@ while run:
         coin_group.draw(screen)
         score = collide_coin(score)
         enemy_group.draw(screen)
+        draw_coins(score)
         game_over = player.update(game_over)
         # draw_grid()
 
@@ -326,3 +313,5 @@ while run:
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
+
+
