@@ -1,4 +1,3 @@
-
 import sys
 
 import pygame
@@ -237,7 +236,7 @@ class Enemy(pygame.sprite.Sprite):
             self.right_flip = True
             self.left_flip = False
             if self.counter_r == tile_size * 2:
-                self.counter_l = 0
+                self.counter_l = -1
         elif self.counter_l <= tile_size * 2:
             self.rect.x -= 1
             self.counter_l += 1
