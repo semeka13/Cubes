@@ -135,7 +135,7 @@ class Player:
         elif game_over and not self.dead:
             self.player = self.grave_img
             self.dead = True
-            self.rect.y += 5
+            self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
         screen.blit(self.player, self.rect)
         return game_over
 
@@ -145,10 +145,10 @@ class Enemy(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image_l = pygame.transform.flip(pygame.image.load('../images/enemy_3.png'), True, False)
         self.image_r = pygame.image.load('../images/enemy_3.png')
-        self.image = pygame.transform.scale(self.image_r, (40, 60))
+        self.image = pygame.transform.scale(self.image_r, (35, 55))
         self.rect = self.image.get_rect()
         self.rect.x = x
-        self.rect.y = y
+        self.rect.y = y + 5
         self.right_flip = True
         self.left_flip = False
         self.counter_r = 0
@@ -161,19 +161,19 @@ class Enemy(pygame.sprite.Sprite):
             self.right_flip = True
             self.left_flip = False
             if self.counter_r == 100:
-                self.counter_l = 100
-        else:
+                self.counter_l = 0
+        elif self.counter_l <= 100:
             self.rect.x -= 1
-            self.counter_l -= 1
+            self.counter_l += 1
             self.right_flip = False
             self.left_flip = True
-            if self.counter_l == 0:
+            if self.counter_l == 100:
                 self.counter_r = 0
 
         if self.left_flip:
-            self.image = pygame.transform.scale(self.image_l, (40, 60))
+            self.image = pygame.transform.scale(self.image_l, (35, 55))
         if self.right_flip:
-            self.image = pygame.transform.scale(self.image_r, (40, 60))
+            self.image = pygame.transform.scale(self.image_r, (35, 55))
 
 
 class World:
