@@ -18,6 +18,7 @@ score = 0
 hp = 3
 max_level = 3
 cur_level = 1
+next_level = False
 # load images
 cave_img = pygame.image.load('../images/cave_bk.png')
 lava_img = pygame.image.load('../images/lava_bk.png')
@@ -57,7 +58,7 @@ def draw_coins(score):
 def draw_hearts():
     heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
     heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
-    data =  [heart_full] * hp + [heart_empty] * (3 - hp)
+    data = [heart_full] * hp + [heart_empty] * (3 - hp)
     for img in range(len(data)):
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
@@ -127,6 +128,7 @@ class Player:
         self.left_flip = False
         self.hp = hp
         self.jump_count = 0
+        self.next_level = False
 
     def update(self):
         x_change = 0
@@ -180,7 +182,7 @@ class Player:
                         self.rect.x, self.rect.y = self.start_pos
             if pygame.sprite.spritecollide(self, door_group, False):
                 pygame.time.wait(100)
-                self.hp = str(f"0{self.hp}")
+                self.next_level = True
 
 
             self.rect.x += x_change
@@ -203,7 +205,7 @@ class Player:
             self.dead = True
             self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
         screen.blit(self.player, self.rect)
-        return self.hp
+        return self.hp, self.next_level
 
 
 class DeathTile(pygame.sprite.Sprite):
@@ -398,14 +400,20 @@ while run:
                 start_screen = StartWindow()
                 player = Player(*player_pos, hp=hp)
                 start_flag = True
-        if len(str(hp)) == 2:
+        if next_level:
             if cur_level + 1 <= max_level:
                 world_data = reset_world(cur_level + 1)
-                world = World()
-                player_pos = world.world_plan(world_data)
-                hp = int(hp[1])
-                player = Player(*player_pos, hp=hp)
                 cur_level += 1
+            else:
+                world_data = reset_world(1)
+                start_flag = True
+                hp = 3
+            world = World()
+            player_pos = world.world_plan(world_data)
+            player = Player(*player_pos, hp=hp)
+
+
+        print(hp)
         door_group.draw(screen)
         death_tile_group.draw(screen)
         coin_group.update()
@@ -414,7 +422,7 @@ while run:
         enemy_group.draw(screen)
         draw_coins(score)
         draw_hearts()
-        hp = player.update()
+        hp, next_level = player.update()
         # draw_grid()
 
     for event in pygame.event.get():
