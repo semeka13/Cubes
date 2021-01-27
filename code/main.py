@@ -49,8 +49,6 @@ def draw_hearts():
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
 
 
-
-
 class StartWindow:
     def update(self):
         intro_text = ["Dungeon Master", "",
@@ -81,8 +79,8 @@ class StartWindow:
 
 
 class Button():
-    def __init__(self, x, y):
-        self.img = pygame.image.load('../images/spikes.png')
+    def __init__(self, x, y, image_name):
+        self.img = pygame.image.load(image_name)
         self.image = pygame.transform.scale(self.img, (tile_size * 2, tile_size * 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -106,7 +104,6 @@ class Button():
 
         # draw button
         screen.blit(self.image, self.rect)
-
         return action
 
 
@@ -204,7 +201,6 @@ class Player:
             self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
         screen.blit(self.player, self.rect)
         return self.hp
-
 
 
 class DeathTile(pygame.sprite.Sprite):
@@ -347,7 +343,8 @@ world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
-restart_button = Button(screen_width // 2 - 50, screen_height // 2 + 100)
+restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png')
+exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png')
 
 run = True
 while run:
@@ -366,6 +363,10 @@ while run:
             if restart_button.draw():
                 player = Player(*player_pos)
                 hp = 3
+            if exit_button.draw():
+                start_screen = StartWindow()
+                player = Player(*player_pos)
+                start_flag = True
 
         death_tile_group.draw(screen)
         coin_group.update()
