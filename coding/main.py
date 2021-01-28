@@ -256,7 +256,8 @@ class World:
             'platform_r_t': pygame.image.load('../images/platform_right_top.png'),
             'platform_l_t': pygame.image.load('../images/platform_left_top.png'),
             'platform_c': pygame.image.load('../images/platform_center.png'),
-            'platform_long': pygame.image.load('../images/platform_long.png')
+            'platform_long': pygame.image.load('../images/platform_long.png'),
+            'lava_center': pygame.image.load('../images/lava_bottom.png')
         }
         img = pygame.transform.scale(tile_images[name], (tile_size, tile_size))
         img_rect = img.get_rect()
@@ -282,6 +283,8 @@ class World:
                     self.add_tile('platform_l_t', col_count, row_count)
                 if tile == ')':
                     self.add_tile('platform_r_t', col_count, row_count)
+                if tile == '8':
+                    self.add_tile('lava_center', col_count, row_count)
                 if tile == '@':
                     player_start_pos_x = col_count * tile_size
                     player_start_pos_y = row_count * tile_size
@@ -309,17 +312,17 @@ class World:
                 if tile == "&":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x, moving_platform_pos_y, 1, 0)
+                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x, moving_platform_pos_y, 0, 1)
                     moving_platform_group.add(moving_platform)
                 if tile == "1":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x, moving_platform_pos_y, 1, 0)
+                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x, moving_platform_pos_y, 0, 1)
                     moving_platform_group.add(moving_platform)
                 if tile == "3":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x, moving_platform_pos_y, 1, 0)
+                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x, moving_platform_pos_y, 0, 1)
                     moving_platform_group.add(moving_platform)
                 col_count += 1
             row_count += 1
