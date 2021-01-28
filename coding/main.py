@@ -60,8 +60,10 @@ def draw_text(stars):
 
 
 def counter(timer):
-    seconds = timer // 60
-    minutes = seconds // 60
+    minutes = 0
+    minutes += timer // 60 // 60
+    seconds = timer // 60 - minutes * 60
+
     game_time = time(minute=minutes, second=seconds, microsecond=timer % 60 * 16 * 1000)
     font = pygame.font.SysFont(
 
