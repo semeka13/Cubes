@@ -56,12 +56,12 @@ class Enemy(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image_l = pygame.transform.flip(pygame.image.load('../images/enemy_3.png'), True, False)
         self.image_r = pygame.image.load('../images/enemy_3.png')
-        self.size_x = tile_size - 7
-        self.size_y = tile_size + 7
+        self.size_x = tile_size - 9
+        self.size_y = tile_size + 5
         self.image = pygame.transform.scale(self.image_r, (self.size_x, self.size_y))
         self.rect = self.image.get_rect()
         self.rect.x = x
-        self.rect.y = y + 2
+        self.rect.y = y + 4
         self.right_flip = True
         self.left_flip = False
         self.counter_r = 0
