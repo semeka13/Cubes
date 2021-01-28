@@ -324,12 +324,12 @@ exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exi
 start_button = Button(screen_width // 2 - 125, screen_height // 2 - 100, '../images/start_button.png', 7, 3)
 exit_button_main = Button(screen_width // 2 - 125, screen_height // 2 + 50, '../images/exit_button_main.png', 7, 3)
 exit_button_level = Button(screen_width // 30, screen_height // 30, '../images/exit_button_main.png', 7, 3)
-level_1 = Button(screen_width // 10, screen_height // 4, '../images/start_button.png', 7, 3)
-level_2 = Button(screen_width // 2.5, screen_height // 4, '../images/start_button.png', 7, 3)
-level_3 = Button(screen_width // 1.5 + 30, screen_height // 4, '../images/start_button.png', 7, 3)
-level_4 = Button(screen_width // 10, screen_height // 2, '../images/start_button.png', 7, 3)
-level_5 = Button(screen_width // 2.5, screen_height // 2, '../images/start_button.png', 7, 3)
-level_6 = Button(screen_width // 1.5 + 30, screen_height // 2, '../images/start_button.png', 7, 3)
+level_1 = Button(screen_width // 10, screen_height // 4, '../images/button_level_1.png', 7, 3)
+level_2 = Button(screen_width // 2.5, screen_height // 4, '../images/button_level_2.png', 7, 3)
+level_3 = Button(screen_width // 1.5 + 30, screen_height // 4, '../images/button_level_3.png', 7, 3)
+level_4 = Button(screen_width // 10, screen_height // 2, '../images/button_level_4.png', 7, 3)
+level_5 = Button(screen_width // 2.5, screen_height // 2, '../images/button_level_5.png', 7, 3)
+level_6 = Button(screen_width // 1.5 + 30, screen_height // 2, '../images/button_level_6.png', 7, 3)
 
 run = True
 lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
@@ -407,9 +407,13 @@ while run:
                 start_screen = StartWindow()
                 start_flag -= 1
 
+        if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            start_flag -= 1
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
 
     pygame.display.update()
     clock.tick(60)
