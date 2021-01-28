@@ -1,26 +1,19 @@
-
 import sys
 
+from coding.sprites import *
 import pygame
 from pygame.locals import *
 
-pygame.init()
+from coding import *
 
-screen_width = 1000
-screen_height = 1000
-
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('Dungeon Master')
-
-# define game variables
-tile_size = 50
 score = 0
 hp = 3
-max_level = 3
 cur_level = 1
-# load images
-cave_img = pygame.image.load('../images/cave_bk.png')
-lava_img = pygame.image.load('../images/lava_bk.png')
+next_level = False
+
+pygame.init()
+
+pygame.display.set_caption('Dungeon Master')
 
 
 def reset_world(level):
@@ -32,6 +25,10 @@ def reset_world(level):
     return level_data
 
 
+def collide_coin(score):
+    if pygame.sprite.spritecollide(player, coin_group, True):
+        score += 1
+    return score
 
 
 def draw_grid():
@@ -40,26 +37,22 @@ def draw_grid():
         pygame.draw.line(screen, (255, 255, 255), (line * tile_size, 0), (line * tile_size, screen_height))
 
 
-def collide_coin(score):
-    if pygame.sprite.spritecollide(player, coin_group, True):
-        score += 1
-    return score
-
-
 def draw_coins(score):
     coin = pygame.transform.scale(pygame.image.load('../images/coin.png'), (tile_size, tile_size))
     coin_black = pygame.transform.scale(pygame.image.load('../images/coin_black.png'), (tile_size, tile_size))
     data = [coin_black] * (3 - score) + [coin] * score
     for img in range(len(data)):
-        screen.blit(data[img], (screen_width - (2 * tile_size) - (54 * img), screen_height - (18.5 * tile_size)))
+        screen.blit(data[img], (screen_width - (2 * tile_size) - (54 * img), screen_height - (20.5 * tile_size)))
 
 
 def draw_hearts():
-    heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 10, tile_size - 10))
-    heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 10, tile_size - 10))
+    heart_full = pygame.transform.scale(pygame.image.load('../images/heart.png'), (tile_size - 5, tile_size - 5))
+    heart_empty = pygame.transform.scale(pygame.image.load('../images/heart_empty.png'), (tile_size - 5, tile_size - 5))
     data = [heart_full] * hp + [heart_empty] * (3 - hp)
     for img in range(len(data)):
-        screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (19 * tile_size) - 10))
+        screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (21.5 * tile_size)))
+
+
 
 
 class StartWindow:
@@ -77,7 +70,7 @@ class StartWindow:
         screen.blit(string_rendered, intro_rect)
 
 
-class Button():
+class Button:
     def __init__(self, x, y, image_name, kx, ky):
         self.img = pygame.image.load(image_name)
         self.image = pygame.transform.scale(self.img, (tile_size * kx, tile_size * ky))
@@ -94,7 +87,7 @@ class Button():
 
         # check mouseover and clicked conditions
         if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
                 action = True
                 self.clicked = True
 
@@ -111,8 +104,9 @@ class Player:
         self.player_image_l = pygame.transform.flip(pygame.image.load('../images/player.png'), True, False)
         self.player_image_r = pygame.image.load('../images/player.png')
         self.player_height = 40
-        self.player = pygame.transform.scale(self.player_image_r, (40, 40))
-        self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave_2.png"), (75, 75))
+        self.player = pygame.transform.scale(self.player_image_r, (tile_size - 3, tile_size - 3))
+        self.grave_img = pygame.transform.scale(pygame.image.load("../images/grave_2.png"),
+                                                (tile_size + 10, tile_size + 10))
         self.rect = self.player.get_rect()
         self.start_pos = (x, y)
         self.rect.x = x
@@ -127,18 +121,20 @@ class Player:
         self.left_flip = False
         self.hp = hp
         self.jump_count = 0
+        self.next_level = False
 
     def update(self):
         x_change = 0
         y_change = 0
+        col_thresh = 20
 
         if self.hp != 0:
             key = pygame.key.get_pressed()
             if ((key[pygame.K_SPACE] and not self.jump) or
-                    (key[pygame.K_w] and not self.jump) or
-                    (key[pygame.K_UP] and not self.jump)) and not self.in_air:
-                    self.y_inc = -15
-                    self.jump = True
+                (key[pygame.K_w] and not self.jump) or
+                (key[pygame.K_UP] and not self.jump)) and not self.in_air:
+                self.y_inc = -14
+                self.jump = True
             if not key[pygame.K_SPACE] and not key[pygame.K_w] and not key[pygame.K_UP]:
                 self.jump = False
             if key[pygame.K_LEFT] or key[pygame.K_a]:
@@ -151,9 +147,9 @@ class Player:
                 self.left_flip = False
 
             if self.left_flip:
-                self.player = pygame.transform.scale(self.player_image_l, (40, 40))
+                self.player = pygame.transform.scale(self.player_image_l, (tile_size - 3, tile_size - 3))
             if self.right_flip:
-                self.player = pygame.transform.scale(self.player_image_r, (40, 40))
+                self.player = pygame.transform.scale(self.player_image_r, (tile_size - 3, tile_size - 3))
 
             self.y_inc += 1
             if self.y_inc > 10:
@@ -180,9 +176,25 @@ class Player:
                         self.rect.x, self.rect.y = self.start_pos
             if pygame.sprite.spritecollide(self, door_group, False):
                 pygame.time.wait(100)
-                self.hp = str(f"0{self.hp}")
+                self.next_level = True
 
-
+            for platform in moving_platform_group:
+                # collision in the x direction
+                if platform.rect.colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
+                    x_change = 0
+                # collision in the y direction
+                if platform.rect.colliderect(self.rect.x, self.rect.y + y_change, self.width, self.height):
+                    # check if below platform
+                    if abs((self.rect.top + y_change) - platform.rect.bottom) < col_thresh:
+                        self.y_inc = 0
+                        y_change = platform.rect.bottom - self.rect.top
+                    # check if above platform
+                    elif abs((self.rect.bottom + y_change) - platform.rect.top) < col_thresh:
+                        self.rect.bottom = platform.rect.top - 1
+                        self.in_air = False
+                        y_change = 0
+                    if platform.move_x != 0:
+                        self.rect.x += platform.dir_move
             self.rect.x += x_change
             self.rect.y += y_change
 
@@ -203,117 +215,43 @@ class Player:
             self.dead = True
             self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
         screen.blit(self.player, self.rect)
-        return self.hp
-
-
-class DeathTile(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('../images/lava_top.png'), (tile_size, tile_size))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image_l = pygame.transform.flip(pygame.image.load('../images/enemy_3.png'), True, False)
-        self.image_r = pygame.image.load('../images/enemy_3.png')
-        self.image = pygame.transform.scale(self.image_r, (35, 55))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y + 5
-        self.right_flip = True
-        self.left_flip = False
-        self.counter_r = 0
-        self.counter_l = 0
-
-    def update(self):
-        if self.counter_r <= 100:
-            self.rect.x += 1
-            self.counter_r += 1
-            self.right_flip = True
-            self.left_flip = False
-            if self.counter_r == 100:
-                self.counter_l = 0
-        elif self.counter_l <= 100:
-            self.rect.x -= 1
-            self.counter_l += 1
-            self.right_flip = False
-            self.left_flip = True
-            if self.counter_l == 100:
-                self.counter_r = 0
-
-        if self.left_flip:
-            self.image = pygame.transform.scale(self.image_l, (35, 55))
-        if self.right_flip:
-            self.image = pygame.transform.scale(self.image_r, (35, 55))
-
-
-class Door(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('../images/finish.png')
-        self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-
-class Coin(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('../images/coin.png')
-        self.image = pygame.transform.scale(img, (tile_size - 10, tile_size - 10))
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+        return self.hp, self.next_level
 
 
 class World:
-    def world_plan(self, data):
-        self.tile_list = []
-        pos = 0
+    def add_tile(self, name, col_count, row_count):
         tile_images = {
             'platform_1': pygame.image.load('../images/platform_1.png'),
             'killer_block': pygame.image.load('../images/spikes.png'),
             'platform_r_t': pygame.image.load('../images/platform_right_top_1.png'),
             'platform_l_t': pygame.image.load('../images/platform_left_top.png'),
             'platform_c': pygame.image.load('../images/platform_center.png'),
+            'platform_long': pygame.image.load('../images/platform_long.png')
         }
+        img = pygame.transform.scale(tile_images[name], (tile_size, tile_size))
+        img_rect = img.get_rect()
+        img_rect.x = col_count * tile_size
+        img_rect.y = row_count * tile_size
+        tile = (img, img_rect)
+        self.tile_list.append(tile)
 
+    def world_plan(self, data):
+        self.tile_list = []
+        pos = 0
         row_count = 0
         for row in data:
             col_count = 0
             for tile in row:
                 if tile == '#':
-                    img = pygame.transform.scale(tile_images['platform_1'], (tile_size, tile_size))
-                    img_rect = img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
-                    tile = (img, img_rect)
-                    self.tile_list.append(tile)
+                    self.add_tile('platform_1', col_count, row_count)
+                if tile == '|':
+                    self.add_tile('platform_long', col_count, row_count)
                 if tile == '_':
-                    img = pygame.transform.scale(tile_images['platform_c'], (tile_size, tile_size))
-                    img_rect = img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
-                    tile = (img, img_rect)
-                    self.tile_list.append(tile)
+                    self.add_tile('platform_c', col_count, row_count)
                 if tile == '(':
-                    img = pygame.transform.scale(tile_images['platform_l_t'], (tile_size, tile_size))
-                    img_rect = img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
-                    tile = (img, img_rect)
-                    self.tile_list.append(tile)
+                    self.add_tile('platform_l_t', col_count, row_count)
                 if tile == ')':
-                    img = pygame.transform.scale(tile_images['platform_r_t'], (tile_size, tile_size))
-                    img_rect = img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
-                    tile = (img, img_rect)
-                    self.tile_list.append(tile)
+                    self.add_tile('platform_r_t', col_count, row_count)
                 if tile == '@':
                     player_start_pos_x = col_count * tile_size
                     player_start_pos_y = row_count * tile_size
@@ -338,6 +276,11 @@ class World:
                     door_pos_y = row_count * tile_size
                     door = Door(door_pos_x, door_pos_y)
                     door_group.add(door)
+                if tile == "&":
+                    moving_platform_pos_x = col_count * tile_size
+                    moving_platform_pos_y = row_count * tile_size
+                    moving_platform = MovingPlatform(moving_platform_pos_x, moving_platform_pos_y, 1, 1)
+                    moving_platform_group.add(moving_platform)
                 col_count += 1
             row_count += 1
         return pos
@@ -347,22 +290,13 @@ class World:
             screen.blit(tile[0], tile[1])
 
 
-def load_level(filename):
-    filename = "../levels/" + filename
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
-
-    max_width = max(map(len, level_map))
-
-    new_level = list(map(lambda x: x.ljust(max_width, '.'), level_map))
-    print(new_level)
-    return new_level
-
-
+screen = pygame.display.set_mode((screen_width, screen_height))
 door_group = pygame.sprite.Group()
 death_tile_group = pygame.sprite.Group()
 coin_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
+moving_platform_group = pygame.sprite.Group()
+
 start_screen = StartWindow()
 start_flag = True
 world_data = load_level('level_test')
@@ -370,24 +304,39 @@ world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
-restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png' , 2, 2)
+restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png', 2, 2)
 exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
-start_button = Button(screen_width // 2 - 110, screen_height // 2 - 150, '../images/start_button.png', 5, 2)
-exit_button_main = Button(screen_width // 2 - 110, screen_height // 2, '../images/exit_button_main.png', 5, 2)
+start_button = Button(screen_width // 2 - 125, screen_height // 2 - 150, '../images/start_button.png', 7, 3)
+exit_button_main = Button(screen_width // 2 - 125, screen_height // 2, '../images/exit_button_main.png', 7, 3)
+lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
 
 run = True
 while run:
     screen.blit(lava_img, (0, 0))
     if start_flag:
-        next = start_screen.update()
+        start_screen.update()
         if start_button.draw():
             start_flag = False
         if exit_button_main.draw():
             run = False
     else:
         world.draw()
+        death_tile_group.draw(screen)
+        moving_platform_group.draw(screen)
 
+        door_group.draw(screen)
+
+        coin_group.update()
+        coin_group.draw(screen)
+
+        score = collide_coin(score)
+        enemy_group.draw(screen)
+        draw_coins(score)
+        draw_hearts()
+        hp, next_level = player.update()
+        # draw_grid()
         if hp != 0:
+            moving_platform_group.update()
             enemy_group.update()
 
         if hp == 0:
@@ -395,27 +344,22 @@ while run:
                 hp = 3
                 player = Player(*player_pos, hp=hp)
             if exit_button.draw():
+                player = Player(*player_pos, hp=3)
                 start_screen = StartWindow()
-                player = Player(*player_pos, hp=hp)
                 start_flag = True
-        if len(str(hp)) == 2:
+
+        if next_level:
+            score = 0
             if cur_level + 1 <= max_level:
                 world_data = reset_world(cur_level + 1)
-                world = World()
-                player_pos = world.world_plan(world_data)
-                hp = int(hp[1])
-                player = Player(*player_pos, hp=hp)
                 cur_level += 1
-        door_group.draw(screen)
-        death_tile_group.draw(screen)
-        coin_group.update()
-        coin_group.draw(screen)
-        score = collide_coin(score)
-        enemy_group.draw(screen)
-        draw_coins(score)
-        draw_hearts()
-        hp = player.update()
-        # draw_grid()
+            else:
+                world_data = reset_world(1)
+                start_flag = True
+                hp = 3
+            world = World()
+            player_pos = world.world_plan(world_data)
+            player = Player(*player_pos, hp=hp)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -424,5 +368,3 @@ while run:
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
-
-
