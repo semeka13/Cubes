@@ -253,7 +253,6 @@ class World:
     def add_tile(self, name, col_count, row_count):
         tile_images = {
             'platform_1': pygame.image.load('../images/platform_1.png'),
-            'killer_block': pygame.image.load('../images/spikes.png'),
             'platform_r_t': pygame.image.load('../images/platform_right_top.png'),
             'platform_l_t': pygame.image.load('../images/platform_left_top.png'),
             'platform_c': pygame.image.load('../images/platform_center.png'),
@@ -340,11 +339,7 @@ moving_platform_group = pygame.sprite.Group()
 
 start_screen = StartWindow()
 menu_screen = LevelMenu()
-
-world_data = load_level('level_test')
 world = World()
-player_pos = world.world_plan(world_data)
-player = Player(*player_pos)
 clock = pygame.time.Clock()
 
 
