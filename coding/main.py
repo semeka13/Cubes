@@ -52,6 +52,17 @@ def draw_hearts():
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (21.5 * tile_size)))
 
 
+def draw_text():
+    intro_text = "You win!"
+    font = pygame.font.SysFont(
+        'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 70)
+    string_rendered = font.render(intro_text, 1, pygame.Color('white'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.x = screen_width // 2.7
+    intro_rect.y = screen_height // 7
+    screen.blit(string_rendered, intro_rect)
+
+
 class StartWindow:
     def update(self):
         intro_text = "Dungeon Master"
@@ -73,13 +84,6 @@ class LevelMenu:
 
         fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
         screen.blit(fon, (0, 0))
-        """font = pygame.font.SysFont(
-            'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 70)
-        string_rendered = font.render(intro_text, 1, pygame.Color('white'))
-        intro_rect = string_rendered.get_rect()
-        intro_rect.x = screen_width // 3 - 110
-        intro_rect.y = screen_height // 7
-        screen.blit(string_rendered, intro_rect)"""
 
 
 class Button:
@@ -133,7 +137,7 @@ class Player:
         self.left_flip = False
         self.hp = hp
         self.jump_count = 0
-        self.next_level = False
+        self.finish = False
 
     def update(self):
         x_change = 0
@@ -186,9 +190,9 @@ class Player:
                     self.hp -= 1
                     if self.hp != 0:
                         self.rect.x, self.rect.y = self.start_pos
+
             if pygame.sprite.spritecollide(self, door_group, False):
-                pygame.time.wait(100)
-                self.next_level = True
+                self.finish = True
 
             for platform in moving_platform_group:
                 # collision in the x direction
@@ -222,12 +226,13 @@ class Player:
 
             if self.rect.left < 0:
                 self.rect.left = 0
+
         elif self.hp == 0 and not self.dead:
             self.player = self.grave_img
             self.dead = True
             self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
         screen.blit(self.player, self.rect)
-        return self.hp, self.next_level
+        return self.hp, self.finish
 
 
 class World:
@@ -408,7 +413,8 @@ while run:
         enemy_group.draw(screen)
         draw_coins(score)
         draw_hearts()
-        hp, next_level = player.update()
+        hp, finish = player.update()
+
         # draw_grid()
         if hp != 0:
             moving_platform_group.update()
@@ -431,6 +437,23 @@ while run:
 
         if pygame.key.get_pressed()[pygame.K_ESCAPE]:
             start_flag -= 1
+
+        if finish:
+            draw_text()
+
+            if restart_button.draw():
+                world_data = reset_world(cur_level)
+                hp = 3
+                score = 0
+                world = World()
+                player_pos = world.world_plan(world_data)
+                player = Player(*player_pos, hp=hp)
+            if exit_button.draw():
+                hp = 3
+                player = Player(*player_pos, hp=hp)
+                start_screen = StartWindow()
+                cur_level = 0
+                start_flag -= 1
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
