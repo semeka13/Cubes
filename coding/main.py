@@ -334,6 +334,7 @@ level_6 = Button(screen_width // 1.5 + 30, screen_height // 2, '../images/start_
 run = True
 lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
 start_flag = 0
+game_start = False
 while run:
     screen.blit(lava_img, (0, 0))
     if start_flag == 0:
@@ -342,30 +343,42 @@ while run:
             start_flag += 1
         if exit_button_main.draw():
             run = False
-    elif start_flag == 1:
+    if start_flag == 1:
         menu_screen.update()
         if level_1.draw():
             world_data = reset_world(1)
             start_flag += 1
+            game_start = True
         if level_2.draw():
             world_data = reset_world(2)
             start_flag += 1
+            game_start = True
         if level_3.draw():
             world_data = reset_world(3)
             start_flag += 1
+            game_start = True
         if level_4.draw():
             world_data = reset_world(4)
             start_flag += 1
+            game_start = True
         if level_5.draw():
             world_data = reset_world(5)
             start_flag += 1
+            game_start = True
         if level_6.draw():
             world_data = reset_world(6)
             start_flag += 1
+            game_start = True
 
         if exit_button_level.draw():
-            start_flag -= 1
+            start_flag = 0
+
     elif start_flag == 2:
+        if game_start:
+            world = World()
+            player_pos = world.world_plan(world_data)
+            player = Player(*player_pos, hp=hp)
+            game_start = False
         world.draw()
         death_tile_group.draw(screen)
         moving_platform_group.draw(screen)
@@ -393,19 +406,6 @@ while run:
                 player = Player(*player_pos, hp=3)
                 start_screen = StartWindow()
                 start_flag -= 1
-
-        if next_level:
-            score = 0
-            if cur_level + 1 <= max_level:
-                world_data = reset_world(cur_level + 1)
-                cur_level += 1
-            else:
-                world_data = reset_world(1)
-                start_flag = True
-                hp = 3
-            world = World()
-            player_pos = world.world_plan(world_data)
-            player = Player(*player_pos, hp=hp)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
