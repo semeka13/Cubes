@@ -8,7 +8,6 @@ from coding import *
 
 score = 0
 hp = 3
-cur_level = 1
 next_level = False
 
 pygame.init()
@@ -236,7 +235,7 @@ class World:
         tile_images = {
             'platform_1': pygame.image.load('../images/platform_1.png'),
             'killer_block': pygame.image.load('../images/spikes.png'),
-            'platform_r_t': pygame.image.load('../images/platform_right_top_1.png'),
+            'platform_r_t': pygame.image.load('../images/platform_right_top.png'),
             'platform_l_t': pygame.image.load('../images/platform_left_top.png'),
             'platform_c': pygame.image.load('../images/platform_center.png'),
             'platform_long': pygame.image.load('../images/platform_long.png')
@@ -292,7 +291,17 @@ class World:
                 if tile == "&":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform(moving_platform_pos_x, moving_platform_pos_y, 1, 0)
+                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x, moving_platform_pos_y, 1, 0)
+                    moving_platform_group.add(moving_platform)
+                if tile == "1":
+                    moving_platform_pos_x = col_count * tile_size
+                    moving_platform_pos_y = row_count * tile_size
+                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x, moving_platform_pos_y, 1, 0)
+                    moving_platform_group.add(moving_platform)
+                if tile == "3":
+                    moving_platform_pos_x = col_count * tile_size
+                    moving_platform_pos_y = row_count * tile_size
+                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x, moving_platform_pos_y, 1, 0)
                     moving_platform_group.add(moving_platform)
                 col_count += 1
             row_count += 1
@@ -334,6 +343,7 @@ level_6 = Button(screen_width // 1.5 + 30, screen_height // 2, '../images/button
 run = True
 lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
 start_flag = 0
+cur_level = 0
 game_start = False
 while run:
     screen.blit(lava_img, (0, 0))
@@ -348,26 +358,32 @@ while run:
         if level_1.draw():
             world_data = reset_world(1)
             start_flag += 1
+            cur_level = 1
             game_start = True
         if level_2.draw():
             world_data = reset_world(2)
             start_flag += 1
+            cur_level = 2
             game_start = True
         if level_3.draw():
             world_data = reset_world(3)
             start_flag += 1
+            cur_level = 3
             game_start = True
         if level_4.draw():
             world_data = reset_world(4)
             start_flag += 1
+            cur_level = 4
             game_start = True
         if level_5.draw():
             world_data = reset_world(5)
             start_flag += 1
+            cur_level = 5
             game_start = True
         if level_6.draw():
             world_data = reset_world(6)
             start_flag += 1
+            cur_level = 6
             game_start = True
 
         if exit_button_level.draw():
@@ -400,11 +416,17 @@ while run:
 
         if hp == 0:
             if restart_button.draw():
+                world_data = reset_world(cur_level)
                 hp = 3
+                score = 0
+                world = World()
+                player_pos = world.world_plan(world_data)
                 player = Player(*player_pos, hp=hp)
             if exit_button.draw():
-                player = Player(*player_pos, hp=3)
+                hp = 3
+                player = Player(*player_pos, hp=hp)
                 start_screen = StartWindow()
+                cur_level = 0
                 start_flag -= 1
 
         if pygame.key.get_pressed()[pygame.K_ESCAPE]:

@@ -32,9 +32,9 @@ class DeathTile(pygame.sprite.Sprite):
 
 
 class MovingPlatform(pygame.sprite.Sprite):
-    def __init__(self, x, y, move_x, move_y):
+    def __init__(self, name,  x, y, move_x, move_y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('../images/platform_1.png')
+        img = pygame.image.load(name)
         self.image = pygame.transform.scale(img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x

@@ -314,7 +314,7 @@ class World:
         tile_images = {
             'platform_1': pygame.image.load('../images/platform_1.png'),
             'killer_block': pygame.image.load('../images/spikes.png'),
-            'platform_r_t': pygame.image.load('../images/platform_right_top_1.png'),
+            'platform_r_t': pygame.image.load('../images/platform_right_top.png'),
             'platform_l_t': pygame.image.load('../images/platform_left_top.png')
         }
 
