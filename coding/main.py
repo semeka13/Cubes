@@ -53,8 +53,6 @@ def draw_hearts():
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (21.5 * tile_size)))
 
 
-
-
 class StartWindow:
     def update(self):
         intro_text = "Dungeon Master"
@@ -68,6 +66,21 @@ class StartWindow:
         intro_rect.x = screen_width // 3 - 110
         intro_rect.y = screen_height // 7
         screen.blit(string_rendered, intro_rect)
+
+
+class LevelMenu:
+    def update(self):
+        intro_text = "Dungeon Master"
+
+        fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
+        screen.blit(fon, (0, 0))
+        """font = pygame.font.SysFont(
+            'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 70)
+        string_rendered = font.render(intro_text, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.x = screen_width // 3 - 110
+        intro_rect.y = screen_height // 7
+        screen.blit(string_rendered, intro_rect)"""
 
 
 class Button:
@@ -279,7 +292,7 @@ class World:
                 if tile == "&":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform(moving_platform_pos_x, moving_platform_pos_y, 1, 1)
+                    moving_platform = MovingPlatform(moving_platform_pos_x, moving_platform_pos_y, 1, 0)
                     moving_platform_group.add(moving_platform)
                 col_count += 1
             row_count += 1
@@ -298,28 +311,61 @@ enemy_group = pygame.sprite.Group()
 moving_platform_group = pygame.sprite.Group()
 
 start_screen = StartWindow()
-start_flag = True
+menu_screen = LevelMenu()
+
 world_data = load_level('level_test')
 world = World()
 player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
+
 restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png', 2, 2)
 exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
-start_button = Button(screen_width // 2 - 125, screen_height // 2 - 150, '../images/start_button.png', 7, 3)
-exit_button_main = Button(screen_width // 2 - 125, screen_height // 2, '../images/exit_button_main.png', 7, 3)
-lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
+start_button = Button(screen_width // 2 - 125, screen_height // 2 - 100, '../images/start_button.png', 7, 3)
+exit_button_main = Button(screen_width // 2 - 125, screen_height // 2 + 50, '../images/exit_button_main.png', 7, 3)
+exit_button_level = Button(screen_width // 30, screen_height // 30, '../images/exit_button_main.png', 7, 3)
+level_1 = Button(screen_width // 10, screen_height // 4, '../images/start_button.png', 7, 3)
+level_2 = Button(screen_width // 2.5, screen_height // 4, '../images/start_button.png', 7, 3)
+level_3 = Button(screen_width // 1.5 + 30, screen_height // 4, '../images/start_button.png', 7, 3)
+level_4 = Button(screen_width // 10, screen_height // 2, '../images/start_button.png', 7, 3)
+level_5 = Button(screen_width // 2.5, screen_height // 2, '../images/start_button.png', 7, 3)
+level_6 = Button(screen_width // 1.5 + 30, screen_height // 2, '../images/start_button.png', 7, 3)
 
 run = True
+lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
+start_flag = 0
 while run:
     screen.blit(lava_img, (0, 0))
-    if start_flag:
+    if start_flag == 0:
         start_screen.update()
         if start_button.draw():
-            start_flag = False
+            start_flag += 1
         if exit_button_main.draw():
             run = False
-    else:
+    elif start_flag == 1:
+        menu_screen.update()
+        if level_1.draw():
+            world_data = reset_world(1)
+            start_flag += 1
+        if level_2.draw():
+            world_data = reset_world(2)
+            start_flag += 1
+        if level_3.draw():
+            world_data = reset_world(3)
+            start_flag += 1
+        if level_4.draw():
+            world_data = reset_world(4)
+            start_flag += 1
+        if level_5.draw():
+            world_data = reset_world(5)
+            start_flag += 1
+        if level_6.draw():
+            world_data = reset_world(6)
+            start_flag += 1
+
+        if exit_button_level.draw():
+            start_flag -= 1
+    elif start_flag == 2:
         world.draw()
         death_tile_group.draw(screen)
         moving_platform_group.draw(screen)
@@ -346,7 +392,7 @@ while run:
             if exit_button.draw():
                 player = Player(*player_pos, hp=3)
                 start_screen = StartWindow()
-                start_flag = True
+                start_flag -= 1
 
         if next_level:
             score = 0
