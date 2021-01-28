@@ -1,10 +1,7 @@
-import sys
-
 from coding.sprites import *
-import pygame
-from pygame.locals import *
-
+from coding.stars_counter import star_counter
 from coding import *
+from datetime import time
 
 score = 0
 hp = 3
@@ -52,13 +49,26 @@ def draw_hearts():
         screen.blit(data[img], (screen_width - (2 * tile_size) - (50 * img) + 5, screen_height - (21.5 * tile_size)))
 
 
-def draw_text():
-    intro_text = "You win!"
+def draw_text(stars):
+    win = pygame.transform.scale(pygame.image.load('../images/you_win.png'), (tile_size * 8, tile_size * 4))
+    screen.blit(win, (screen_width // 2.8, screen_height // 4))
+    stars_full = pygame.transform.scale(pygame.image.load('../images/star_full.png'), (tile_size * 5, tile_size * 5))
+    stars_empty = pygame.transform.scale(pygame.image.load('../images/star_empty.png'), (tile_size * 5, tile_size * 5))
+    data = [stars_empty] * (3 - stars) + [stars_full] * stars
+    for img in range(len(data)):
+        screen.blit(data[img], (screen_width - (2 * tile_size) - (170 * img) - 520, screen_height - (10 * tile_size) - 90))
+
+
+def counter(timer):
+    seconds = timer // 60
+    minutes = seconds // 60
+    game_time = time(minute=minutes, second=seconds, microsecond=timer % 60 * 16 * 1000)
     font = pygame.font.SysFont(
-        'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 70)
-    string_rendered = font.render(intro_text, 1, pygame.Color('white'))
+
+        'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 25)
+    string_rendered = font.render(str(game_time)[3:11], 1, pygame.Color('white'))
     intro_rect = string_rendered.get_rect()
-    intro_rect.x = screen_width // 2.7
+    intro_rect.x = screen_width - 165
     intro_rect.y = screen_height // 7
     screen.blit(string_rendered, intro_rect)
 
@@ -333,11 +343,12 @@ player_pos = world.world_plan(world_data)
 player = Player(*player_pos)
 clock = pygame.time.Clock()
 
+
 restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png', 2, 2)
 exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
-start_button = Button(screen_width // 2 - 125, screen_height // 2 - 100, '../images/start_button.png', 7, 3)
-exit_button_main = Button(screen_width // 2 - 125, screen_height // 2 + 50, '../images/exit_button_main.png', 7, 3)
-exit_button_level = Button(screen_width // 30, screen_height // 30, '../images/exit_button_main.png', 7, 3)
+start_button = Button(screen_width // 2 - 140, screen_height // 2 - 100, '../images/start_button.png', 8, 3)
+exit_button_main = Button(screen_width // 2 - 140, screen_height // 2 + 50, '../images/exit_button_main.png', 8, 3)
+exit_button_level = Button(screen_width // 30, screen_height // 30, '../images/exit_button_main.png', 8, 3)
 level_1 = Button(screen_width // 10, screen_height // 4, '../images/button_level_1.png', 7, 3)
 level_2 = Button(screen_width // 2.5, screen_height // 4, '../images/button_level_2.png', 7, 3)
 level_3 = Button(screen_width // 1.5 + 30, screen_height // 4, '../images/button_level_3.png', 7, 3)
@@ -350,6 +361,9 @@ lava_img = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (s
 start_flag = 0
 cur_level = 0
 game_start = False
+timer = 0
+level_time = 0
+
 while run:
     screen.blit(lava_img, (0, 0))
     if start_flag == 0:
@@ -365,36 +379,44 @@ while run:
             start_flag += 1
             cur_level = 1
             game_start = True
+            level_time = 30
         if level_2.draw():
             world_data = reset_world(2)
             start_flag += 1
             cur_level = 2
             game_start = True
+            level_time = 30
         if level_3.draw():
             world_data = reset_world(3)
             start_flag += 1
             cur_level = 3
             game_start = True
+            level_time = 30
         if level_4.draw():
             world_data = reset_world(4)
             start_flag += 1
             cur_level = 4
             game_start = True
+            level_time = 30
         if level_5.draw():
             world_data = reset_world(5)
             start_flag += 1
             cur_level = 5
             game_start = True
+            level_time = 30
         if level_6.draw():
             world_data = reset_world(6)
             start_flag += 1
             cur_level = 6
             game_start = True
+            level_time = 30
 
         if exit_button_level.draw():
             start_flag = 0
 
     elif start_flag == 2:
+        timer += 1
+        counter(timer)
         if game_start:
             world = World()
             player_pos = world.world_plan(world_data)
@@ -421,6 +443,7 @@ while run:
             enemy_group.update()
 
         if hp == 0:
+            timer -= 1
             if restart_button.draw():
                 world_data = reset_world(cur_level)
                 hp = 3
@@ -428,23 +451,28 @@ while run:
                 world = World()
                 player_pos = world.world_plan(world_data)
                 player = Player(*player_pos, hp=hp)
+                timer = 0
             if exit_button.draw():
                 hp = 3
                 player = Player(*player_pos, hp=hp)
                 start_screen = StartWindow()
                 cur_level = 0
                 start_flag -= 1
+                timer = 0
 
         if pygame.key.get_pressed()[pygame.K_ESCAPE]:
             start_flag -= 1
+            timer = 0
 
         if finish:
-            draw_text()
-
+            timer -= 1
+            stars = star_counter(hp, score, timer, level_time)
+            draw_text(stars)
             if restart_button.draw():
                 world_data = reset_world(cur_level)
                 hp = 3
                 score = 0
+                timer = 0
                 world = World()
                 player_pos = world.world_plan(world_data)
                 player = Player(*player_pos, hp=hp)
@@ -454,11 +482,11 @@ while run:
                 start_screen = StartWindow()
                 cur_level = 0
                 start_flag -= 1
+                timer = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-
 
     pygame.display.update()
     clock.tick(60)
