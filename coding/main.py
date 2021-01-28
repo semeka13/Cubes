@@ -154,7 +154,7 @@ class Player:
         y_change = 0
         col_thresh = 20
 
-        if self.hp != 0:
+        if self.hp != 0 and not self.finish:
             key = pygame.key.get_pressed()
             if ((key[pygame.K_SPACE] and not self.jump) or
                 (key[pygame.K_w] and not self.jump) or
@@ -237,10 +237,14 @@ class Player:
             if self.rect.left < 0:
                 self.rect.left = 0
 
-        elif self.hp == 0 and not self.dead:
+        elif self.hp == 0 and not self.dead and not self.finish:
             self.player = self.grave_img
             self.dead = True
             self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
+
+        elif self.finish:
+            self.player = self.player
+
         screen.blit(self.player, self.rect)
         return self.hp, self.finish
 
@@ -344,8 +348,9 @@ player = Player(*player_pos)
 clock = pygame.time.Clock()
 
 
-restart_button = Button(screen_width // 2 - 120, screen_height // 50, '../images/restart_button.png', 2, 2)
-exit_button = Button(screen_width // 2 + 20, screen_height // 50, '../images/exit_button.png', 2, 2)
+restart_button = Button(screen_width // 2 - 140, screen_height // 50, '../images/restart_button.png', 2, 2)
+exit_button = Button(screen_width // 2 + 40, screen_height // 50, '../images/exit_button.png', 2, 2)
+next_level_button = Button(screen_width // 2 - 50, screen_height // 50, '../images/next_level.png', 2, 2)
 start_button = Button(screen_width // 2 - 140, screen_height // 2 - 100, '../images/start_button.png', 8, 3)
 exit_button_main = Button(screen_width // 2 - 140, screen_height // 2 + 50, '../images/exit_button_main.png', 8, 3)
 exit_button_level = Button(screen_width // 30, screen_height // 30, '../images/exit_button_main.png', 8, 3)
@@ -465,10 +470,20 @@ while run:
             timer = 0
 
         if finish:
+            seconds = timer // 60
             timer -= 1
-            stars = star_counter(hp, score, timer, level_time)
+            stars = star_counter(hp, score, seconds, level_time)
             draw_text(stars)
             if restart_button.draw():
+                world_data = reset_world(cur_level)
+                hp = 3
+                score = 0
+                timer = 0
+                world = World()
+                player_pos = world.world_plan(world_data)
+                player = Player(*player_pos, hp=hp)
+            if next_level_button.draw():
+                cur_level += 1
                 world_data = reset_world(cur_level)
                 hp = 3
                 score = 0
@@ -481,6 +496,7 @@ while run:
                 player = Player(*player_pos, hp=hp)
                 start_screen = StartWindow()
                 cur_level = 0
+                score = 0
                 start_flag -= 1
                 timer = 0
 
