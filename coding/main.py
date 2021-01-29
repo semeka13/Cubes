@@ -94,9 +94,6 @@ def moving_platform_draw(col, row, image_name, x_dir, y_dir):
 class StartWindow:
     def update(self):
         intro_text = "Dungeon Master"
-
-        fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
-        screen.blit(fon, (0, 0))
         font = pygame.font.SysFont(
             'sitkasmallsitkatextboldsitkasubheadingboldsitkaheadingboldsitkadisplayboldsitkabannerbold', 70)
         string_rendered = font.render(intro_text, 1, pygame.Color('white'))
@@ -104,12 +101,6 @@ class StartWindow:
         intro_rect.x = screen_width // 3 - 110
         intro_rect.y = screen_height // 7
         screen.blit(string_rendered, intro_rect)
-
-
-class LevelMenu:
-    def update(self):
-        fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
-        screen.blit(fon, (0, 0))
 
 
 class Button:
@@ -376,7 +367,6 @@ enemy_group = pygame.sprite.Group()
 moving_platform_group = pygame.sprite.Group()
 
 start_screen = StartWindow()
-menu_screen = LevelMenu()
 world = World()
 clock = pygame.time.Clock()
 
@@ -400,6 +390,7 @@ cur_level = 0
 game_start = False
 timer = 0
 level_time = 0
+bd = 3
 
 while run:
     screen.blit(lava_img, (0, 0))
@@ -410,7 +401,6 @@ while run:
         if exit_button_main.draw():
             run = False
     if start_flag == 1:
-        menu_screen.update()
         if level_1.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(1, start_flag, 27)
         if level_2.draw():
