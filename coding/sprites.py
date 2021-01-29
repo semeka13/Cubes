@@ -8,7 +8,7 @@ class Door(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (int(tile_size * 1.1), int(tile_size * 1.5)))
         self.rect = self.image.get_rect()
         self.rect.x = x - 3
-        self.rect.y = y - 20
+        self.rect.y = y - 16
 
 
 class Coin(pygame.sprite.Sprite):
