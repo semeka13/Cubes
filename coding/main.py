@@ -356,7 +356,7 @@ class World:
                 if tile == "4":
                     moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 1, 0)
                 if tile == "6":
-                    moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 1, 0)
+                    moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', 1, 0)
                 col_count += 1
             row_count += 1
         return pos
