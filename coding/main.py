@@ -345,18 +345,24 @@ class World:
                     door_pos_y = row_count * tile_size
                     door = Door(door_pos_x, door_pos_y)
                     door_group.add(door)
-                if tile == "&":
+                if tile == "2":
                     moving_platform_draw(col_count, row_count, '../images/platform_1.png', 0, 1)
                 if tile == "1":
                     moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 0, 1)
                 if tile == "3":
                     moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', 0, 1)
-                if tile == "%":
+                if tile == "5":
                     moving_platform_draw(col_count, row_count, '../images/platform_1.png', 1, 0)
                 if tile == "4":
                     moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 1, 0)
                 if tile == "6":
                     moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', 1, 0)
+                if tile == "&":
+                    moving_platform_draw(col_count, row_count, '../images/platform_1.png', -1, 0)
+                if tile == "7":
+                    moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', -1, 0)
+                if tile == "9":
+                    moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', -1, 0)
                 col_count += 1
             row_count += 1
         return pos
