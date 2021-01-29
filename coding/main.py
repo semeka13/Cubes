@@ -267,7 +267,7 @@ class Player:
             self.y_inc += 1
             if self.y_inc > 10:
                 self.y_inc = 10
-
+            y_change += self.y_inc
             for tile in world.tile_list:
                 if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
                     x_change = 0
@@ -278,7 +278,6 @@ class Player:
                     elif self.y_inc >= 0:
                         y_change = tile[1].top - self.rect.bottom
                         self.y_inc = 0
-            y_change += self.y_inc
             self.rect.x += x_change
             self.rect.y += y_change
         screen.blit(self.player, self.rect)
