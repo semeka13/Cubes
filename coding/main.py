@@ -108,8 +108,6 @@ class StartWindow:
 
 class LevelMenu:
     def update(self):
-        intro_text = "Dungeon Master"
-
         fon = pygame.transform.scale(pygame.image.load('../images/lava_bk.png'), (screen_width, screen_height))
         screen.blit(fon, (0, 0))
 
@@ -125,11 +123,7 @@ class Button:
 
     def draw(self):
         action = False
-
-        # get mouse position
         pos = pygame.mouse.get_pos()
-
-        # check mouseover and clicked conditions
         if self.rect.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
                 action = True
@@ -138,7 +132,6 @@ class Button:
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
 
-        # draw button
         screen.blit(self.image, self.rect)
         return action
 
@@ -223,22 +216,20 @@ class Player:
                 self.finish = True
 
             for platform in moving_platform_group:
-                # collision in the x direction
                 if platform.rect.colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
                     x_change = 0
-                # collision in the y direction
                 if platform.rect.colliderect(self.rect.x, self.rect.y + y_change, self.width, self.height):
-                    # check if below platform
                     if abs((self.rect.top + y_change) - platform.rect.bottom) < col_thresh:
                         self.y_inc = 0
                         y_change = platform.rect.bottom - self.rect.top
-                    # check if above platform
                     elif abs((self.rect.bottom + y_change) - platform.rect.top) < col_thresh:
                         self.rect.bottom = platform.rect.top - 1
                         self.in_air = False
                         y_change = 0
-                    if platform.move_x != 0:
+                    if platform.move_x > 0:
                         self.rect.x += platform.dir_move
+                    if platform.move_x < 0:
+                        self.rect.x -= platform.dir_move
             self.rect.x += x_change
             self.rect.y += y_change
 
