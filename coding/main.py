@@ -17,6 +17,7 @@ def reset_world(level):
     enemy_group.empty()
     coin_group.empty()
     death_tile_group.empty()
+    moving_platform_group.empty()
     level_data = load_level(f"level_{level}")
     return level_data
 
@@ -56,7 +57,8 @@ def draw_text(stars):
     stars_empty = pygame.transform.scale(pygame.image.load('../images/star_empty.png'), (tile_size * 5, tile_size * 5))
     data = [stars_empty] * (3 - stars) + [stars_full] * stars
     for img in range(len(data)):
-        screen.blit(data[img], (screen_width - (2 * tile_size) - (170 * img) - 520, screen_height - (10 * tile_size) - 90))
+        screen.blit(data[img],
+                    (screen_width - (2 * tile_size) - (170 * img) - 520, screen_height - (10 * tile_size) - 90))
 
 
 def counter(timer):
@@ -73,6 +75,12 @@ def counter(timer):
     intro_rect.x = screen_width - 165
     intro_rect.y = screen_height // 7
     screen.blit(string_rendered, intro_rect)
+
+
+def generate_level(level_n, start_flag, time_level):
+    data = reset_world(level_n)
+    start_flag += 1
+    return level_n, start_flag, time_level, True, data
 
 
 class StartWindow:
@@ -314,17 +322,37 @@ class World:
                 if tile == "&":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x, moving_platform_pos_y, 0, 1)
+                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x,
+                                                     moving_platform_pos_y, 0, 1)
                     moving_platform_group.add(moving_platform)
                 if tile == "1":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x, moving_platform_pos_y, 0, 1)
+                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x,
+                                                     moving_platform_pos_y, 0, 1)
                     moving_platform_group.add(moving_platform)
                 if tile == "3":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x, moving_platform_pos_y, 0, 1)
+                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x,
+                                                     moving_platform_pos_y, 0, 1)
+                if tile == "%":
+                    moving_platform_pos_x = col_count * tile_size
+                    moving_platform_pos_y = row_count * tile_size
+                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x,
+                                                     moving_platform_pos_y, 1, 0)
+                    moving_platform_group.add(moving_platform)
+                if tile == "4":
+                    moving_platform_pos_x = col_count * tile_size
+                    moving_platform_pos_y = row_count * tile_size
+                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x,
+                                                     moving_platform_pos_y, 1, 0)
+                    moving_platform_group.add(moving_platform)
+                if tile == "6":
+                    moving_platform_pos_x = col_count * tile_size
+                    moving_platform_pos_y = row_count * tile_size
+                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x,
+                                                     moving_platform_pos_y, 1, 0)
                     moving_platform_group.add(moving_platform)
                 col_count += 1
             row_count += 1
@@ -346,7 +374,6 @@ start_screen = StartWindow()
 menu_screen = LevelMenu()
 world = World()
 clock = pygame.time.Clock()
-
 
 restart_button = Button(screen_width // 2 - 140, screen_height // 50, '../images/restart_button.png', 2, 2)
 exit_button = Button(screen_width // 2 + 40, screen_height // 50, '../images/exit_button.png', 2, 2)
@@ -380,42 +407,17 @@ while run:
     if start_flag == 1:
         menu_screen.update()
         if level_1.draw():
-            world_data = reset_world(1)
-            start_flag += 1
-            cur_level = 1
-            game_start = True
-            level_time = 30
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(1, start_flag, 30)
         if level_2.draw():
-            world_data = reset_world(2)
-            start_flag += 1
-            cur_level = 2
-            game_start = True
-            level_time = 30
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(2, start_flag, 30)
         if level_3.draw():
-            world_data = reset_world(3)
-            start_flag += 1
-            cur_level = 3
-            game_start = True
-            level_time = 30
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(3, start_flag, 30)
         if level_4.draw():
-            world_data = reset_world(4)
-            start_flag += 1
-            cur_level = 4
-            game_start = True
-            level_time = 30
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(4, start_flag, 30)
         if level_5.draw():
-            world_data = reset_world(5)
-            start_flag += 1
-            cur_level = 5
-            game_start = True
-            level_time = 30
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(5, start_flag, 30)
         if level_6.draw():
-            world_data = reset_world(6)
-            start_flag += 1
-            cur_level = 6
-            game_start = True
-            level_time = 30
-
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(6, start_flag, 30)
         if exit_button_level.draw():
             start_flag = 0
 
