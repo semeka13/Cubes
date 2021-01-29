@@ -353,6 +353,12 @@ class World:
                     moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', -1, 0)
                 if tile == "9":
                     moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', -1, 0)
+                if tile == "w":
+                    moving_platform_draw(col_count, row_count, '../images/platform_1.png', 0, -1)
+                if tile == "q":
+                    moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 0, -1)
+                if tile == "e":
+                    moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', 0, -1)
                 col_count += 1
             row_count += 1
         return pos
@@ -410,7 +416,7 @@ while run:
         if level_2.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(2, start_flag, 24)
         if level_3.draw():
-            cur_level, start_flag, level_time, game_start, world_data = generate_level(3, start_flag, 30)
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(3, start_flag, 42)
         if level_4.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(4, start_flag, 30)
         if level_5.draw():
@@ -470,6 +476,15 @@ while run:
             start_flag -= 1
             hp = 3
             score = 0
+            timer = 0
+
+        if pygame.key.get_pressed()[pygame.K_r]:
+            world_data = reset_world(cur_level)
+            hp = 3
+            score = 0
+            world = World()
+            player_pos = world.world_plan(world_data)
+            player = Player(*player_pos, hp=hp)
             timer = 0
 
         if finish:
