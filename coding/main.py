@@ -418,7 +418,7 @@ while run:
         if level_3.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(3, start_flag, 42)
         if level_4.draw():
-            cur_level, start_flag, level_time, game_start, world_data = generate_level(4, start_flag, 30)
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(4, start_flag, 48)
         if level_5.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(5, start_flag, 30)
         if level_6.draw():
