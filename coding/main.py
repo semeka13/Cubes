@@ -250,11 +250,29 @@ class Player:
         elif self.hp == 0 and not self.dead and not self.finish:
             self.player = self.grave_img
             self.dead = True
-            self.rect.y = (self.rect.y // tile_size) * tile_size - tile_size
+            self.y_inc = -10
 
         elif self.finish:
             self.player = self.player
 
+        if self.dead:
+            self.y_inc += 1
+            if self.y_inc > 10:
+                self.y_inc = 10
+
+            for tile in world.tile_list:
+                if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.width, self.height):
+                    x_change = 0
+                if tile[1].colliderect(self.rect.x, self.rect.y + y_change, self.width, self.height):
+                    if self.y_inc < 0:
+                        y_change = tile[1].bottom - self.rect.top
+                        self.y_inc = 0
+                    elif self.y_inc >= 0:
+                        y_change = tile[1].top - self.rect.bottom
+                        self.y_inc = 0
+            y_change += self.y_inc
+            self.rect.x += x_change
+            self.rect.y += y_change
         screen.blit(self.player, self.rect)
         return self.hp, self.finish
 
@@ -336,6 +354,7 @@ class World:
                     moving_platform_pos_y = row_count * tile_size
                     moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x,
                                                      moving_platform_pos_y, 0, 1)
+                    moving_platform_group.add(moving_platform)
                 if tile == "%":
                     moving_platform_pos_x = col_count * tile_size
                     moving_platform_pos_y = row_count * tile_size
