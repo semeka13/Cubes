@@ -83,6 +83,14 @@ def generate_level(level_n, start_flag, time_level):
     return level_n, start_flag, time_level, True, data
 
 
+def moving_platform_draw(col, row, image_name, x_dir, y_dir):
+    moving_platform_pos_x = col * tile_size
+    moving_platform_pos_y = row * tile_size
+    moving_platform = MovingPlatform(image_name, moving_platform_pos_x,
+                                     moving_platform_pos_y, x_dir, y_dir)
+    moving_platform_group.add(moving_platform)
+
+
 class StartWindow:
     def update(self):
         intro_text = "Dungeon Master"
@@ -338,41 +346,17 @@ class World:
                     door = Door(door_pos_x, door_pos_y)
                     door_group.add(door)
                 if tile == "&":
-                    moving_platform_pos_x = col_count * tile_size
-                    moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x,
-                                                     moving_platform_pos_y, 0, 1)
-                    moving_platform_group.add(moving_platform)
+                    moving_platform_draw(col_count, row_count, '../images/platform_1.png', 0, 1)
                 if tile == "1":
-                    moving_platform_pos_x = col_count * tile_size
-                    moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x,
-                                                     moving_platform_pos_y, 0, 1)
-                    moving_platform_group.add(moving_platform)
+                    moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 0, 1)
                 if tile == "3":
-                    moving_platform_pos_x = col_count * tile_size
-                    moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x,
-                                                     moving_platform_pos_y, 0, 1)
-                    moving_platform_group.add(moving_platform)
+                    moving_platform_draw(col_count, row_count, '../images/platform_right_top.png', 0, 1)
                 if tile == "%":
-                    moving_platform_pos_x = col_count * tile_size
-                    moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_1.png', moving_platform_pos_x,
-                                                     moving_platform_pos_y, 1, 0)
-                    moving_platform_group.add(moving_platform)
+                    moving_platform_draw(col_count, row_count, '../images/platform_1.png', 1, 0)
                 if tile == "4":
-                    moving_platform_pos_x = col_count * tile_size
-                    moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_left_top.png', moving_platform_pos_x,
-                                                     moving_platform_pos_y, 1, 0)
-                    moving_platform_group.add(moving_platform)
+                    moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 1, 0)
                 if tile == "6":
-                    moving_platform_pos_x = col_count * tile_size
-                    moving_platform_pos_y = row_count * tile_size
-                    moving_platform = MovingPlatform('../images/platform_right_top.png', moving_platform_pos_x,
-                                                     moving_platform_pos_y, 1, 0)
-                    moving_platform_group.add(moving_platform)
+                    moving_platform_draw(col_count, row_count, '../images/platform_left_top.png', 1, 0)
                 col_count += 1
             row_count += 1
         return pos
@@ -426,9 +410,9 @@ while run:
     if start_flag == 1:
         menu_screen.update()
         if level_1.draw():
-            cur_level, start_flag, level_time, game_start, world_data = generate_level(1, start_flag, 30)
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(1, start_flag, 27)
         if level_2.draw():
-            cur_level, start_flag, level_time, game_start, world_data = generate_level(2, start_flag, 30)
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(2, start_flag, 24)
         if level_3.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(3, start_flag, 30)
         if level_4.draw():
@@ -488,6 +472,8 @@ while run:
 
         if pygame.key.get_pressed()[pygame.K_ESCAPE]:
             start_flag -= 1
+            hp = 3
+            score = 0
             timer = 0
 
         if finish:
