@@ -390,7 +390,6 @@ cur_level = 0
 game_start = False
 timer = 0
 level_time = 0
-bd = 3
 
 while run:
     screen.blit(lava_img, (0, 0))
