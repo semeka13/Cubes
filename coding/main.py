@@ -11,6 +11,9 @@ pygame.init()
 
 pygame.display.set_caption('Dungeon Master')
 
+pygame.mixer.music.load('../music/track_1.mp3')
+pygame.mixer.music.play(-1)
+
 
 def reset_world(level):
     door_group.empty()
@@ -411,7 +414,7 @@ while run:
         if level_5.draw():
             cur_level, start_flag, level_time, game_start, world_data = generate_level(5, start_flag, 30)
         if level_6.draw():
-            cur_level, start_flag, level_time, game_start, world_data = generate_level(6, start_flag, 30)
+            cur_level, start_flag, level_time, game_start, world_data = generate_level(6, start_flag, 3)
         if exit_button_level.draw():
             start_flag = 0
 
