@@ -492,7 +492,7 @@ while run:
                 world = World()
                 player_pos = world.world_plan(world_data)
                 player = Player(*player_pos, hp=hp)
-            if cur_level == 6:
+            if cur_level != 6:
                 if next_level_button.draw():
                     cur_level += 1
                     world_data = reset_world(cur_level)
